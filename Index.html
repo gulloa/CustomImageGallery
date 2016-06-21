@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html;" charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<title>Image Gallery</title>
+	<link href="content/css/css.css" rel="stylesheet" type="text/css">
+    <link href="content/css/overrides.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="scripts/modernizr-custom.js"></script>
+</head>
+<body>
+	<section>
+    	<h1>Image Gallery Preview</h1>
+        <div class="image-gallery items-10" id="demoGallery">
+        	<div class="viewer">
+            	
+                	<ul class="list-inline clearfix track">
+                    	<li>
+                        	<figure class="gallery-item">
+                                <img src="content/img/001.jpg" class="img-responsive" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/002.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/003.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/004.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/005.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/006.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/007.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/008.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/009.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/010.jpg" />
+                            </figure>
+                        </li>
+                        <!-- <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/011.jpg" />
+                            </figure>
+                        </li>
+                        <li>
+                            <figure class="gallery-item">
+                                <img src="content/img/000.jpg" />
+                            </figure>
+                        </li> -->
+                    </ul>
+                
+            </div>
+            <div class="thumbnails">
+            	<div class="track">
+                    <ul class="list-inline">
+                        <li>
+                            <figure class="thumbnail"></figure>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="controls">
+                <a href="" class="prev">prev</a>
+                <a href="" class="next">next</a>
+            </div>
+        </div>
+        <div class="data-panel">
+            <p id="csstransitions">
+                Accepts css transitions: <label></label>
+            </p>
+            <p id="csstransforms">
+                Accepts css transforms: <label></label>
+            </p>
+        </div>
+    </section>
+    <script type="text/javascript" src="scripts/jQuery-1.11.3.js"></script>
+    <script type="text/javascript" src="scripts/jquery.touchSwipe.min.js"></script>
+    <script type="text/javascript" src="scripts/imageGallery.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Aries.Plugins.ImageGallery.Init();
+        });
+    </script>
+</body>
+</html>
