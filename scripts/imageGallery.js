@@ -89,28 +89,52 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
         }
     }
 
-    var _nextTransitionSlide = function() {
+    var _getItemWidth = function() {
+        var jqoItems = $("#demoGallery .viewer li"); 
+        //var iItemWidth = Math.round(jqoItems.width().valueOf());
+        var iItemWidth = Math.abs(jqoItems.width());
+        return iItemWidth;
+    };
+    var _getItemsLength = function() {
+        var jqoItems = $("#demoGallery .viewer li"); 
+        var iItemsLength = jqoItems.length;
+        return iItemsLength;
+    };
+
+
+    var _prev = function() {
+        // currentImg = Math.max(currentImg - 1, 0);
+        // scrollImages(IMG_WIDTH * currentImg, speed);
+
+        var iLength = _getItemsLength();
+        var iWidth = _getItemWidth();
+        var nDistance = iWidth * _iCurrentSlideIndex;
+        var iDuration = 600;
+
+        _iCurrentSlideIndex = Math.max(_iCurrentSlideIndex - 1, 0);
+        _dragSlides(iWidth * _iCurrentSlideIndex, iDuration);
+    };
+
+    var _next = function() {
         // currentImg = Math.min(currentImg + 1, maxImages - 1);
         // scrollImages(IMG_WIDTH * currentImg, speed);
 
-        var jqoItems = $("#demoGallery .viewer li"); 
-        var jqoItemsLength = $("#demoGallery .viewer li").length;
-        var iItemWidth = Math.round(jqoItems.width().valueOf());
-        var nDistance = iItemWidth * _iCurrentSlideIndex;
+        var iLength = _getItemsLength();
+        var iWidth = _getItemWidth();
+        var nDistance = iWidth * _iCurrentSlideIndex;
         var iDuration = 600;
 
-        _iCurrentSlideIndex = Math.min(_iCurrentSlideIndex + 1, jqoItemsLength - 1);
-        _dragSlides(iItemWidth * _iCurrentSlideIndex, iDuration);
+        _iCurrentSlideIndex = Math.min(_iCurrentSlideIndex + 1, iLength - 1);
+        _dragSlides(iWidth * _iCurrentSlideIndex, iDuration);
     };
 
-    var _prevTransitionSlide = function() {};
-
-    var _setAnimationProperties = function(jqo, duration, position) {
-        var sCSSTransitionDuration, sCSSTransform, sCSSValue, bIsIE, jqoTrack, iDuration, sPosition;
+    var _setAnimationProperties = function(jqo, duration, position, usePercentage) {
+        var sCSSTransitionDuration, sCSSTransform, sCSSValue, bIsIE, jqoTrack, iDuration, sPosition, bUsePercentage;
         iDuration = duration;
         sPosition = position;
         jqoTrack = jqo;
         bIsIE = _getIEVersion();
+        bUsePercentage = usePercentage ? usePercentage : false;
         sCSSTransitionDuration =    '-webkit-transition-duration: ' + iDuration + 's;' + 
                                         '-moz-transition-duration: ' + iDuration + 's;' + 
                                         'transition-duration: ' + iDuration + 's;'; 
@@ -390,26 +414,32 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
                     // _nextSlide(event, arguments);
 
                     IMG_WIDTH = Math.round($("#demoGallery .viewer li").width().valueOf());
-                    _dragSlides((IMG_WIDTH * currentImg) + distance, duration);
-                    //_dragSlides((IMG_WIDTH * _iCurrentSlideIndex) + distance, duration);
+                    //_dragSlides((IMG_WIDTH * currentImg) + distance, duration);
+                    _dragSlides((IMG_WIDTH * _iCurrentSlideIndex) + distance, duration);
 
                     /*var iItemWidth = Math.round($("#demoGallery .viewer li").width().valueOf());
                     var nDistance = (iItemWidth * _iCurrentSlideIndex) + distance;
                     _dragSlides(nDistance, duration);*/
 
                 } else if (direction == "right") {
-                    scrollImages((IMG_WIDTH * currentImg) - distance, duration); //_prevSlide();
+                    //scrollImages((IMG_WIDTH * currentImg) - distance, duration); //_prevSlide();
+
+                    IMG_WIDTH = Math.round($("#demoGallery .viewer li").width().valueOf());
+                    _dragSlides((IMG_WIDTH * _iCurrentSlideIndex) - distance, duration);
                 }
 
             } else if (phase == "cancel") {
-                scrollImages(IMG_WIDTH * currentImg, speed);
+                //scrollImages(IMG_WIDTH * currentImg, speed);
+                //-scrollImages(IMG_WIDTH * _iCurrentSlideIndex, speed);
+                _dragSlides((IMG_WIDTH * _iCurrentSlideIndex), duration);
             } else if (phase == "end") {
                 if (direction == "right") {
-                    previousImage();
+                    //previousImage();
+                    _prev();
                 } else if (direction == "left") {
-                    nextImage();
+                    //- nextImage();
                     //_nextSlide();
-                    //_nextTransitionSlide();
+                    _next();
                 }
             }
         }
@@ -418,7 +448,7 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
             triggerOnTouchEnd: true,
             swipeStatus: swipeStatus,
             allowPageScroll: "vertical",
-            threshold: 60
+            threshold: 90
         };
 
         imgs = $("#demoGallery .viewer");
