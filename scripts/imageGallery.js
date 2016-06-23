@@ -1,9 +1,10 @@
-var Aries = window.Aries || {};
-Aries.Plugins = window.Aries.Plugins || {};
-Aries.Plugins.ImageGallery = (function ($, undefined) {
+var App = window.App || {};
+App.Plugins = window.Aries.Plugins || {};
+App.Plugins.ImageGallery = (function ($, undefined) {
 
     var _loop, _slides, _slidesData, _currentSlide = 0, _loopFirstTime = true, _fallbackSlideShow, _slidesList;
     var _iCurrentSlideIndex = 0;
+    var _nTranslateX = 0;
 
     var _extendJQueryEasing = function () {
         jQuery.extend(jQuery.easing, {
@@ -92,40 +93,13 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
     var _getItemWidth = function() {
         var jqoItems = $("#demoGallery .viewer li"); 
         //var iItemWidth = Math.round(jqoItems.width().valueOf());
-        var iItemWidth = Math.abs(jqoItems.width());
+        var iItemWidth = Math.abs(jqoItems.width()); console.log('iItemWidth: '+iItemWidth);
         return iItemWidth;
     };
     var _getItemsLength = function() {
         var jqoItems = $("#demoGallery .viewer li"); 
         var iItemsLength = jqoItems.length;
         return iItemsLength;
-    };
-
-
-    var _prev = function() {
-        // currentImg = Math.max(currentImg - 1, 0);
-        // scrollImages(IMG_WIDTH * currentImg, speed);
-
-        var iLength = _getItemsLength();
-        var iWidth = _getItemWidth();
-        var nDistance = iWidth * _iCurrentSlideIndex;
-        var iDuration = 600;
-
-        _iCurrentSlideIndex = Math.max(_iCurrentSlideIndex - 1, 0);
-        _dragSlides(iWidth * _iCurrentSlideIndex, iDuration);
-    };
-
-    var _next = function() {
-        // currentImg = Math.min(currentImg + 1, maxImages - 1);
-        // scrollImages(IMG_WIDTH * currentImg, speed);
-
-        var iLength = _getItemsLength();
-        var iWidth = _getItemWidth();
-        var nDistance = iWidth * _iCurrentSlideIndex;
-        var iDuration = 600;
-
-        _iCurrentSlideIndex = Math.min(_iCurrentSlideIndex + 1, iLength - 1);
-        _dragSlides(iWidth * _iCurrentSlideIndex, iDuration);
     };
 
     var _setAnimationProperties = function(jqo, duration, position, usePercentage) {
@@ -155,16 +129,50 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
         }
     }
 
+    var _prev = function() {
+        // currentImg = Math.max(currentImg - 1, 0);
+        // scrollImages(IMG_WIDTH * currentImg, speed);
+
+        console.log('prev');
+        var iLength = _getItemsLength();
+        var iWidth = _getItemWidth();
+        var nDistance = iWidth * _iCurrentSlideIndex;
+        var iDuration = 600;
+        var iPosition;
+
+        _iCurrentSlideIndex = Math.max(_iCurrentSlideIndex - 1, 0);
+        iPosition = -1 * (iWidth * _iCurrentSlideIndex);
+        _dragSlides(iPosition, iDuration);
+    };
+
+    var _next = function() {
+        // currentImg = Math.min(currentImg + 1, maxImages - 1);
+        // scrollImages(IMG_WIDTH * currentImg, speed);
+
+        console.log('next');
+        var iLength = _getItemsLength();
+        var iWidth = _getItemWidth();
+        var nDistance = iWidth * _iCurrentSlideIndex;
+        var iDuration = 600;
+
+        _iCurrentSlideIndex = Math.min(_iCurrentSlideIndex + 1, iLength - 1);
+        _dragSlides('-'+ (iWidth * _iCurrentSlideIndex), iDuration);
+    };
+
     var _dragSlides = function(distance, duration) {
         var bCSSTransitions = Modernizr.csstransitions;
         var bCSSTransforms = Modernizr.csstransforms;
         var jqoTrack = $('.viewer .track', '#demoGallery');
-        var iDuration = (duration / 1000).toFixed(1);
-        var sPosition = (distance < 0 ? "" : "-") + Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
-        //-var sPosition = (distance < 0 ? "" : "-") + Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
+        var iDuration = (duration / 1000).toFixed(1); //- console.log('iDuration: '+iDuration)
+        //var iDuration = duration.toFixed(1);
+        //var sPosition = (iDuration > 0 ? "" : "-") + Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
+        //var sPosition = Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
+        var sPosition = distance + 'px'; //- console.log('drag position: '+sPosition);
 
         if(bCSSTransitions && bCSSTransforms) {
             _setAnimationProperties(jqoTrack, iDuration, sPosition);
+            var iWidth = _getItemWidth();
+            _nTranslateX = (iWidth * _iCurrentSlideIndex);
         }
 
         /*$("#demoGallery .track").css("transition-duration", (duration / 1000).toFixed(1) + "s");
@@ -172,6 +180,64 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
         //inverse the number we set in the css
         var value = (distance < 0 ? "" : "-") + Math.abs(distance).toString();
         $("#demoGallery .track").css("transform", "translate(" + value + "px,0)");*/
+    };
+
+    var _swipeStatus = function(event, phase, direction, distance) {
+        var sPhase = phase; 
+        console.log('direction: '+direction);
+        console.log('distance: '+distance);
+
+        switch(sPhase) {
+            case "move":
+                var sDirection = direction;
+                var iDistance = distance;
+                var iDuration = 0;
+                var iItemWidth = _getItemWidth();
+                var iPosition;
+
+                if(sDirection == "left") {
+                    
+                    //-iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) + iDistance);
+                    //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
+
+                    var iTrackPositionX =  _nTranslateX - distance; console.log('iTrackPositionX: '+iTrackPositionX);
+                    iPosition = iTrackPositionX; console.log('iPosition: '+iPosition);
+                    iPosition = -(distance);
+                    _dragSlides(iPosition, iDuration); console.log('_nTranslateX: '+_nTranslateX);
+                }
+                else if(sDirection == "right") {
+                    iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) - iDistance);
+                    //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
+                    _dragSlides(iPosition, iDuration);
+                }
+                break;
+
+            case "cancel":
+                var iDuration = 600;
+                var iItemWidth = _getItemWidth();
+                var iPosition;
+
+                iPosition = (iItemWidth * _iCurrentSlideIndex);
+                _dragSlides(iPosition, iDuration);
+                break;
+
+            case "end":
+                console.log('end');
+
+                var sDirection = direction;
+                if(sDirection == "left") {
+                    _next();
+                    //-_nextSlide();
+                }
+                else if(sDirection == "right") {
+                    _prev();
+                    //-_prevSlide();
+                }
+                break;
+
+            default:
+                break;
+        }
     };
 
     var _nextSlide = function(e, arguments) {
@@ -261,10 +327,10 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
         }
     }
     var _prevSlide = function(e) {
-        if(e.preventDefault)
+        if(e && e.preventDefault)
             e.preventDefault();
 
-        if(e.stopPropagation)
+        if(e && e.stopPropagation)
             e.stopPropagation();
 
         _resetWidth();
@@ -398,6 +464,7 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
 
         //drag and swipe
         function swipeStatus(event, phase, direction, distance) {
+
             //If we are moving before swipe, and we are going L or R in X mode, or U or D in Y mode then drag.
             if (phase == "move" && (direction == "left" || direction == "right")) {
                 var duration = 0;
@@ -431,7 +498,7 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
             } else if (phase == "cancel") {
                 //scrollImages(IMG_WIDTH * currentImg, speed);
                 //-scrollImages(IMG_WIDTH * _iCurrentSlideIndex, speed);
-                _dragSlides((IMG_WIDTH * _iCurrentSlideIndex), duration);
+                _dragSlides((IMG_WIDTH * _iCurrentSlideIndex), duration); console.log('duration: '+duration);
             } else if (phase == "end") {
                 if (direction == "right") {
                     //previousImage();
@@ -446,7 +513,7 @@ Aries.Plugins.ImageGallery = (function ($, undefined) {
 
         var swipeOptions = {
             triggerOnTouchEnd: true,
-            swipeStatus: swipeStatus,
+            swipeStatus: _swipeStatus,
             allowPageScroll: "vertical",
             threshold: 90
         };
