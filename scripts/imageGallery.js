@@ -2,7 +2,7 @@ var App = window.App || {};
 App.Plugins = window.App.Plugins || {};
 App.Plugins.ImageGallery = (function ($, undefined) {
 
-    var _loop, _slides, _slidesData, _currentSlide = 0, _loopFirstTime = true, _fallbackSlideShow, _slidesList;
+    //var _loop, _slides, _slidesData, _currentSlide = 0, _loopFirstTime = true, _fallbackSlideShow, _slidesList;
     var _iCurrentSlideIndex = 0;
 
     var _extendJQueryEasing = function () {
@@ -95,6 +95,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         var iItemWidth = Math.abs(jqoItems.width()); console.log('iItemWidth: '+iItemWidth);
         return iItemWidth;
     };
+
     var _getItemsLength = function() {
         var jqoItems = $("#demoGallery .viewer li"); 
         var iItemsLength = jqoItems.length;
@@ -132,127 +133,6 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         }
     }
 
-    var _prev = function() {
-        // currentImg = Math.max(currentImg - 1, 0);
-        // scrollImages(IMG_WIDTH * currentImg, speed);
-
-        console.log('prev');
-        var iLength = _getItemsLength();
-        var iWidth = _getItemWidth();
-        var nDistance = iWidth * _iCurrentSlideIndex;
-        var iDuration = 600;
-        var iPosition;
-
-        _iCurrentSlideIndex = Math.max(_iCurrentSlideIndex - 1, 0);
-        iPosition = -1 * (iWidth * _iCurrentSlideIndex);
-        _dragSlides(iPosition, iDuration);
-
-        var iWidth = _getItemWidth();
-        _nTranslateX = (iWidth * _iCurrentSlideIndex);
-    };
-
-    var _next = function() {
-        // currentImg = Math.min(currentImg + 1, maxImages - 1);
-        // scrollImages(IMG_WIDTH * currentImg, speed);
-
-        console.log('next');
-        var iLength = _getItemsLength();
-        var iWidth = _getItemWidth();
-        var nDistance = iWidth * _iCurrentSlideIndex;
-        var iDuration = 600;
-
-        _iCurrentSlideIndex = Math.min(_iCurrentSlideIndex + 1, iLength - 1);
-        _dragSlides('-'+ (iWidth * _iCurrentSlideIndex), iDuration);
-
-        var iWidth = _getItemWidth();
-        _nTranslateX = (iWidth * _iCurrentSlideIndex);
-    };
-
-    var _dragSlides = function(distance, duration) {
-        var bCSSTransitions = Modernizr.csstransitions;
-        var bCSSTransforms = Modernizr.csstransforms;
-        var jqoTrack = $('.viewer .track', '#demoGallery');
-        var iDuration = (duration / 1000).toFixed(1); //- console.log('iDuration: '+iDuration)
-        //var iDuration = duration.toFixed(1);
-        //var sPosition = (iDuration > 0 ? "" : "-") + Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
-        //var sPosition = Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
-        //var sPosition = distance.toString() + 'px'; console.log('drag position: '+sPosition);
-        var sPosition = distance; console.log('drag position: '+sPosition);
-        //return;
-
-        if(bCSSTransitions && bCSSTransforms) {
-            _setAnimationProperties(jqoTrack, iDuration, distance);
-        }
-
-        /*$("#demoGallery .track").css("transition-duration", (duration / 1000).toFixed(1) + "s");
-        
-        //inverse the number we set in the css
-        var value = (distance < 0 ? "" : "-") + Math.abs(distance).toString();
-        $("#demoGallery .track").css("transform", "translate(" + value + "px,0)");*/
-    };
-
-    var _swipeStatus = function(event, phase, direction, distance) {
-        var sPhase = phase; 
-        console.log('direction: '+direction);
-        console.log('distance: '+distance);
-
-        switch(sPhase) {
-            case "move":
-                var sDirection = direction;
-                var iDistance = distance;
-                var iDuration = 0;
-                var iItemWidth = _getItemWidth();
-                var iPosition;
-
-                if(sDirection == "left") {
-                    
-                    //-iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) + iDistance);
-                    //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
-
-                    console.log('moving left');
-
-                    var iTrackPositionX =  _nTranslateX - distance;     console.log('iTrackPositionX: '+iTrackPositionX);
-                    iPosition = iTrackPositionX; console.log('iPosition: '+iPosition);
-                    iPosition = -(distance);
-                    _dragSlides(iPosition, iDuration); console.log('_nTranslateX: '+_nTranslateX);
-                }
-                else if(sDirection == "right") {
-                    /*
-                    iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) - iDistance);
-                    //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
-                    _dragSlides(iPosition, iDuration);
-                    */
-                }
-                break;
-
-            case "cancel":
-                var iDuration = 600;
-                var iItemWidth = _getItemWidth();
-                var iPosition;
-
-                iPosition = (iItemWidth * _iCurrentSlideIndex);
-                _dragSlides(iPosition, iDuration);
-                break;
-
-            case "end":
-                console.log('end');
-
-                var sDirection = direction;
-                if(sDirection == "left") {
-                    _next();
-                    //-_nextSlide();
-                }
-                else if(sDirection == "right") {
-                    _prev();
-                    //-_prevSlide();
-                }
-                break;
-
-            default:
-                break;
-        }
-    };
-
     var _swipeImages = function(e, direction) {
         if(e && e.preventDefault)
             e.preventDefault();
@@ -283,8 +163,10 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
                 if(!isIE) {
                     jqoTrack.attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
+                    //_setAnimationProperties(jqoTrack, iDuration, distance);
                 } else {
                     jqoTrack.attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
+                    //_setAnimationProperties(jqoTrack, iDuration, distance);
                 }
             } 
             else {
@@ -295,133 +177,15 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         }
     };
 
-    var _nextSlide = function(e, arguments) {
-        if(e && e.preventDefault)
-            e.preventDefault();
-
-        if(e && e.stopPropagation)
-            e.stopPropagation();
-
-        //get next gallery item
-        var jqoGalleryItems = $('.viewer .gallery-item', '#demoGallery');
-        var iGallerySize = jqoGalleryItems.length;
-        var iNextIndex = _iCurrentSlideIndex + 1;
-
-        if(iNextIndex < iGallerySize) {
-            var jqoListItems = $('.viewer ul li', '#demoGallery');
-            var itemWidth = Math.abs(jqoListItems.width()); //jqoListItems.width().valueOf();
-            var jqoTrack= $('.viewer .track', '#demoGallery');
-            var iTrackWidth = Math.abs(jqoTrack.width()); //jqoTrack.width();
-            var isIE = _getIEVersion();
-            var bCSSTransitions = Modernizr.csstransitions;
-            var bCSSTransforms = Modernizr.csstransforms;
-
-            if(bCSSTransitions && bCSSTransforms) {
-                if(arguments) {
-                    console.log('has arguments: ' + arguments);
-                    
-                        var oArguments = arguments;
-                        var iValue = (_iCurrentSlideIndex * itemWidth) + oArguments.x;
-                        var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
-                        var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage)+'%';
-                        var iDuration = oArguments.t;
-                        var sCSSTransitionDuration =    '-webkit-transition-duration: ' + iDuration + 's;' + 
-                                                        '-moz-transition-duration: ' + iDuration + 's;' + 
-                                                        'transition-duration: ' + iDuration + 's;'; 
-
-                        var sCSSTransform =     '-webkit-transform: translate(' + sPosition + ',0);' + 
-                                                '-moz-transform: translate(' + sPosition + ',0);' + 
-                                                'transform: translate(' + sPosition + ',0);'; 
-                        var sCSSValue = sCSSTransitionDuration + sCSSTransform;
-                        
-                    if(isIE == false) {
-                        jqoTrack.attr('style', sCSSValue);
-
-                        // $('.viewer .track', '#demoGallery').css("transition-duration", iDuration+"s");
-                        // $('.viewer .track', '#demoGallery').attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0);');
-                    } else {
-                        sCSSTransitionDuration =    '-ms-transition-duration: ' + iDuration + 's;' + 
-                                                        'transition-duration: ' + iDuration + 's;';
-
-                        sCSSTransform =     '-ms-transform: translate(' + sPosition + ',0);' + 
-                                                'transform: translate(' + sPosition + ',0);';
-                        sCSSValue = sCSSTransitionDuration + sCSSTransform;
-
-                        jqoTrack.attr('style', sCSSValue);
-
-                        // $('.viewer .track', '#demoGallery').css("transition-duration", iDuration+"s");
-                        // $('.viewer .track', '#demoGallery').attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
-                    }
-                    //return;
-                }
-                else {
-                    _iCurrentSlideIndex++;
-                    console.log(_iCurrentSlideIndex);
-
-                    var iValue = (_iCurrentSlideIndex * itemWidth);
-                    var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
-                    //var sPosition = iValue == 0 ? 0 : '-' + iValue+'px';
-                    var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage)+'%';
-                    
-                    if(isIE == false) {
-                        $('.viewer .track', '#demoGallery').attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
-                    } else {
-                        $('.viewer .track', '#demoGallery').attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
-                    }
-                }
-            }
-            else {
-                console.log('next: no css transitions');
-                var iValue = (_iCurrentSlideIndex * 100);
-                var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
-                //$('.viewer .track', '#demoGallery').attr('style', 'left: ' + sPosition);
-                $('.viewer .track', '#demoGallery').animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
-            }
-        }
+    var _nextSlide = function() {
+        _swipeImages(event, "next");
     }
-    var _prevSlide = function(e) {
-        if(e && e.preventDefault)
-            e.preventDefault();
-
-        if(e && e.stopPropagation)
-            e.stopPropagation();
-
-        var jqoGalleryItems = $('.viewer .gallery-item', '#demoGallery');
-        var iGallerySize = jqoGalleryItems.length;
-        var iNextIndex = _iCurrentSlideIndex - 1;
-
-        if(iNextIndex >= 0) {
-            _iCurrentSlideIndex--;
-            console.log(_iCurrentSlideIndex);
-
-            if(Modernizr.csstransitions && Modernizr.csstransforms) {
-                var jqoListItems = $('.viewer ul li', '#demoGallery');
-                var itemWidth = jqoListItems.width();
-                var iValue = (_iCurrentSlideIndex * itemWidth);
-                var iTrackWidth = $('.viewer .track', '#demoGallery').width();
-                var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
-                //var sPosition = iValue == 0 ? 0 : '-' + iValue+'px';
-                var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage)+'%';
-                var isIE = _getIEVersion();
-                if(isIE == false) {
-                    $('.viewer .track', '#demoGallery').attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
-                } else {
-                    $('.viewer .track', '#demoGallery').attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
-                }
-            }
-            else {
-                console.log('prev: no css transitions');
-                var iValue = (_iCurrentSlideIndex * 100);
-                var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
-                //$('.viewer .track', '#demoGallery').attr('style', 'left: ' + sPosition);
-                $('.viewer .track', '#demoGallery').animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
-            }
-        }
+    var _prevSlide = function() {
+        _swipeImages(event, "prev");
     }
 
     var _swipeCallback = function(event, phase, direction, distance) {
         var sPhase = phase; 
-        var jqoTrackTranslateXValue;
 
         switch(sPhase) {
             case "end":
@@ -429,11 +193,9 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
                 var sDirection = direction;
                 if(sDirection == "left") {
-                    //- _nextSlide();
                     _swipeImages(event, "next");
                 }
                 else if(sDirection == "right") {
-                    //- _prevSlide();
                     _swipeImages(event, "prev");
                 }
                 break;
