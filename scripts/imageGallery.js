@@ -1,10 +1,13 @@
 var App = window.App || {};
-App.Plugins = window.Aries.Plugins || {};
+App.Plugins = window.App.Plugins || {};
 App.Plugins.ImageGallery = (function ($, undefined) {
 
     var _loop, _slides, _slidesData, _currentSlide = 0, _loopFirstTime = true, _fallbackSlideShow, _slidesList;
     var _iCurrentSlideIndex = 0;
     var _nTranslateX = 0;
+    var _ANIMATION_DURATION = 600;
+    var _jqoTrack = $('.viewer .track', '#demoGallery');
+    var _iCachedDistance = 0;
 
     var _extendJQueryEasing = function () {
         jQuery.extend(jQuery.easing, {
@@ -103,9 +106,12 @@ App.Plugins.ImageGallery = (function ($, undefined) {
     };
 
     var _setAnimationProperties = function(jqo, duration, position, usePercentage) {
+        console.log('Inside of setAnimationProperties');
         var sCSSTransitionDuration, sCSSTransform, sCSSValue, bIsIE, jqoTrack, iDuration, sPosition, bUsePercentage;
+        _nTranslateX = position; console.log('translateX set to: '+_nTranslateX);
+
         iDuration = duration;
-        sPosition = position;
+        sPosition = !usePercentage ? position.toString() + 'px' : "";
         jqoTrack = jqo;
         bIsIE = _getIEVersion();
         bUsePercentage = usePercentage ? usePercentage : false;
@@ -116,6 +122,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
                                 '-moz-transform: translate(' + sPosition + ',0);' + 
                                 'transform: translate(' + sPosition + ',0);'; 
         sCSSValue = sCSSTransitionDuration + sCSSTransform;
+
         
         if(bIsIE == false) {
             jqoTrack.attr('style', sCSSValue);
@@ -143,6 +150,9 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         _iCurrentSlideIndex = Math.max(_iCurrentSlideIndex - 1, 0);
         iPosition = -1 * (iWidth * _iCurrentSlideIndex);
         _dragSlides(iPosition, iDuration);
+
+        var iWidth = _getItemWidth();
+        _nTranslateX = (iWidth * _iCurrentSlideIndex);
     };
 
     var _next = function() {
@@ -157,6 +167,9 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
         _iCurrentSlideIndex = Math.min(_iCurrentSlideIndex + 1, iLength - 1);
         _dragSlides('-'+ (iWidth * _iCurrentSlideIndex), iDuration);
+
+        var iWidth = _getItemWidth();
+        _nTranslateX = (iWidth * _iCurrentSlideIndex);
     };
 
     var _dragSlides = function(distance, duration) {
@@ -167,12 +180,12 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         //var iDuration = duration.toFixed(1);
         //var sPosition = (iDuration > 0 ? "" : "-") + Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
         //var sPosition = Math.abs(distance).toString() + 'px'; console.log('drag position: '+sPosition);
-        var sPosition = distance + 'px'; //- console.log('drag position: '+sPosition);
+        //var sPosition = distance.toString() + 'px'; console.log('drag position: '+sPosition);
+        var sPosition = distance; console.log('drag position: '+sPosition);
+        //return;
 
         if(bCSSTransitions && bCSSTransforms) {
-            _setAnimationProperties(jqoTrack, iDuration, sPosition);
-            var iWidth = _getItemWidth();
-            _nTranslateX = (iWidth * _iCurrentSlideIndex);
+            _setAnimationProperties(jqoTrack, iDuration, distance);
         }
 
         /*$("#demoGallery .track").css("transition-duration", (duration / 1000).toFixed(1) + "s");
@@ -200,15 +213,19 @@ App.Plugins.ImageGallery = (function ($, undefined) {
                     //-iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) + iDistance);
                     //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
 
-                    var iTrackPositionX =  _nTranslateX - distance; console.log('iTrackPositionX: '+iTrackPositionX);
+                    console.log('moving left');
+
+                    var iTrackPositionX =  _nTranslateX - distance;     console.log('iTrackPositionX: '+iTrackPositionX);
                     iPosition = iTrackPositionX; console.log('iPosition: '+iPosition);
                     iPosition = -(distance);
                     _dragSlides(iPosition, iDuration); console.log('_nTranslateX: '+_nTranslateX);
                 }
                 else if(sDirection == "right") {
+                    /*
                     iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) - iDistance);
                     //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
                     _dragSlides(iPosition, iDuration);
+                    */
                 }
                 break;
 
@@ -333,8 +350,6 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         if(e && e.stopPropagation)
             e.stopPropagation();
 
-        _resetWidth();
-
         var jqoGalleryItems = $('.viewer .gallery-item', '#demoGallery');
         var iGallerySize = jqoGalleryItems.length;
         var iNextIndex = _iCurrentSlideIndex - 1;
@@ -367,159 +382,88 @@ App.Plugins.ImageGallery = (function ($, undefined) {
             }
         }
     }
-    var _resetWidth = function() {
-        var $viewer = $('.viewer', '#demoGallery');
-        var $items = $('.viewer li', '#demoGallery');
-        var iItemsCount = $items.length;
-        var nItemWidth = 100/iItemsCount;
 
-        var iViewerWidth =  $viewer.width().valueOf();
-        //var iViewerWidth = $viewer[0].getBoundingClientRect().round(); 
+    var _swipeCallback = function(event, phase, direction, distance) {
+        var sPhase = phase; 
+        var jqoTrackTranslateXValue;
 
-        console.log('iViewerWidth: ' + iViewerWidth);
-        //$viewer.width('100%');
-        //$items.attr('style', 'width: '+ iViewerWidth + 'px; max-width:'+ iViewerWidth + 'px;');
-        //$items.attr('style', 'width: '+ nItemWidth + '%; max-width:'+ nItemWidth + '%;');
-        //-$items.attr('style', 'width: '+ nItemWidth + '%;');
+        switch(sPhase) {
+            case "move":
 
-        var sCSSValue = Math.round(nItemWidth).toString() + '%;';
-        console.log('css width: '+ sCSSValue);
-        // $items.each(function(index,val){
-        //     val.setAttribute("style",sCSSValue);
-        //     console.log(val.style)
-        // });
-        //$viewer.width(iViewerWidth+'px');
+                var initial = _iCurrentSlideIndex * _getItemWidth();
+                var nPf;
+                var nPi = jqoTrackTranslateXValue; // jqoTrackTranslateXValue || 0; // != undefined ? jqoTrackTranslateXValue : 0; // == undefined ? 0 : jqoTrackTranslateXValue; //_nTranslateX;  
+                var nDistance = distance;
+                var sDirection = direction;
+                var nDuration = _ANIMATION_DURATION;
+
+                if(sDirection == "left") {
+
+                    console.log('moving left');
+                    /*
+                    console.log('nPi: '+nPi);
+                    nPf = nPi - distance;  console.log('nPf: '+nPf);
+                    nDuration = 0;
+                     _dragSlides(nPf, nDuration);
+                     _iCachedDistance = distance;
+                     */
+                }
+                else if(sDirection == "right") {
+                    /*
+                    iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) - iDistance);
+                    //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
+                    _dragSlides(iPosition, iDuration);
+                    */
+                }
+                else {
+                    return;
+                }
+                break;
+
+            case "cancel":
+                var iDuration = 600;
+                var iItemWidth = _getItemWidth();
+                var iPosition;
+                
+                iPosition = (iItemWidth * _iCurrentSlideIndex);
+                //- _dragSlides(iPosition, iDuration);
+
+                //_nTranslateX = _iCurrentSlideIndex;
+                /**/
+                break;
+
+            case "end":
+                console.log('end');
+
+                var sDirection = direction;
+                if(sDirection == "left") {
+                    _nextSlide();
+                }
+                else if(sDirection == "right") {
+                    _prevSlide();
+                }
+                break;
+
+            default:
+                break;
+        }
     };
 
     var _init = function () {
         _extendJQueryEasing();
 
-
         $('.controls .next', '#demoGallery').bind('click', _nextSlide);
         $('.controls .prev', '#demoGallery').bind('click', _prevSlide);
-        //-_resetWidth();
-
-        $(window).on('resize', _resetWidth);
-
-        // $("#demoGallery .viewer").swipe({
-        //     //Generic swipe handler for all directions
-        //     swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
-        //           //$(this).text("You swiped " + direction );  
-        //           var sDirection = direction;
-        //           console.log(sDirection);
-        //           console.log(event);
-        //           console.log(fingerData);
-
-        //         if(sDirection == 'left') {
-        //             _nextSlide({});
-        //         }
-        //         if(sDirection == 'right') {
-        //             _prevSlide({});
-        //         }
-        //     },
-        //     swipeStatus:function(event, phase, direction, distance, duration, fingerCount)
-        //     {
-        //       //Here we can check the:
-        //       //phase : 'start', 'move', 'end', 'cancel'
-        //       //direction : 'left', 'right', 'up', 'down'
-        //       //distance : Distance finger is from initial touch point in px
-        //       //duration : Length of swipe in MS 
-        //       //fingerCount : the number of fingers used
-        //     },
-        //     triggerOnTouchEnd: false,
-        //     allowPageScroll: "vertical",
-        //     threshold:30,
-        //     fingers:1
-        // });
-
-        console.log('gallery ready');
-
-        $('#csstransitions label').text(Modernizr.csstransitions);
-        $('#csstransforms label').text(Modernizr.csstransforms);
-
-
-
-        var IMG_WIDTH = Math.round($("#demoGallery .viewer li").width());
-        var currentImg = _iCurrentSlideIndex;
-        var maxImages = $("#demoGallery .viewer li").length;
-        var speed = 600;
-
-        function previousImage() {
-            currentImg = Math.max(currentImg - 1, 0);
-            scrollImages(IMG_WIDTH * currentImg, speed);
-        }
-
-        function nextImage() {
-            currentImg = Math.min(currentImg + 1, maxImages - 1);
-            scrollImages(IMG_WIDTH * currentImg, speed);
-        }
-
-        function scrollImages(distance, duration) {
-            $("#demoGallery .track").css("transition-duration", (duration / 1000).toFixed(1) + "s");
-
-            //inverse the number we set in the css
-            var value = (distance < 0 ? "" : "-") + Math.abs(distance).toString();
-            $("#demoGallery .track").css("transform", "translate(" + value + "px,0)");
-        }
-
-        //drag and swipe
-        function swipeStatus(event, phase, direction, distance) {
-
-            //If we are moving before swipe, and we are going L or R in X mode, or U or D in Y mode then drag.
-            if (phase == "move" && (direction == "left" || direction == "right")) {
-                var duration = 0;
-
-                if (direction == "left") {
-                    /*IMG_WIDTH = Math.round($("#demoGallery .viewer li").width().valueOf());
-                    scrollImages((IMG_WIDTH * currentImg) + distance, duration); */
-
-                    // console.log('left d:' + distance);
-                    // var arguments = {
-                    //     x: distance,
-                    //     t: duration
-                    // }
-                    // _nextSlide(event, arguments);
-
-                    IMG_WIDTH = Math.round($("#demoGallery .viewer li").width().valueOf());
-                    //_dragSlides((IMG_WIDTH * currentImg) + distance, duration);
-                    _dragSlides((IMG_WIDTH * _iCurrentSlideIndex) + distance, duration);
-
-                    /*var iItemWidth = Math.round($("#demoGallery .viewer li").width().valueOf());
-                    var nDistance = (iItemWidth * _iCurrentSlideIndex) + distance;
-                    _dragSlides(nDistance, duration);*/
-
-                } else if (direction == "right") {
-                    //scrollImages((IMG_WIDTH * currentImg) - distance, duration); //_prevSlide();
-
-                    IMG_WIDTH = Math.round($("#demoGallery .viewer li").width().valueOf());
-                    _dragSlides((IMG_WIDTH * _iCurrentSlideIndex) - distance, duration);
-                }
-
-            } else if (phase == "cancel") {
-                //scrollImages(IMG_WIDTH * currentImg, speed);
-                //-scrollImages(IMG_WIDTH * _iCurrentSlideIndex, speed);
-                _dragSlides((IMG_WIDTH * _iCurrentSlideIndex), duration); console.log('duration: '+duration);
-            } else if (phase == "end") {
-                if (direction == "right") {
-                    //previousImage();
-                    _prev();
-                } else if (direction == "left") {
-                    //- nextImage();
-                    //_nextSlide();
-                    _next();
-                }
-            }
-        }
 
         var swipeOptions = {
             triggerOnTouchEnd: true,
-            swipeStatus: _swipeStatus,
+            swipeStatus: _swipeCallback, //_swipeStatus,
             allowPageScroll: "vertical",
             threshold: 90
         };
 
-        imgs = $("#demoGallery .viewer");
-        imgs.swipe(swipeOptions);
+        var jqoImgs = $("#demoGallery .viewer");
+        jqoImgs.swipe(swipeOptions);
 
     };
 
