@@ -4,10 +4,6 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
     var _loop, _slides, _slidesData, _currentSlide = 0, _loopFirstTime = true, _fallbackSlideShow, _slidesList;
     var _iCurrentSlideIndex = 0;
-    var _nTranslateX = 0;
-    var _ANIMATION_DURATION = 600;
-    var _jqoTrack = $('.viewer .track', '#demoGallery');
-    var _iCachedDistance = 0;
 
     var _extendJQueryEasing = function () {
         jQuery.extend(jQuery.easing, {
@@ -257,14 +253,54 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         }
     };
 
-    var _nextSlide = function(e, arguments) {
+    var _swipeImages = function(e, direction) {
         if(e && e.preventDefault)
             e.preventDefault();
 
         if(e && e.stopPropagation)
             e.stopPropagation();
 
-        //_resetWidth();
+        var jqoGalleryItems = $('.viewer .gallery-item', '#demoGallery');
+        var iGallerySize = jqoGalleryItems.length;
+        var iNextIndex = direction == "next" ? _iCurrentSlideIndex + 1 : _iCurrentSlideIndex - 1;
+        var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
+
+        if (bCanSwipeNextIndex) {
+            var jqoListItems = $('.viewer ul li', '#demoGallery');
+            var itemWidth = Math.abs(jqoListItems.width()); 
+            var jqoTrack= $('.viewer .track', '#demoGallery');
+            var iTrackWidth = Math.abs(jqoTrack.width()); 
+            var isIE = _getIEVersion();
+            var bCSSTransitions = Modernizr.csstransitions;
+            var bCSSTransforms = Modernizr.csstransforms;
+            var bCSSAnimation = bCSSTransitions && bCSSTransforms; console.log('bCSSAnimation: '+bCSSAnimation);
+
+            if(bCSSAnimation) {
+                _iCurrentSlideIndex = iNextIndex;
+                var iValue = (_iCurrentSlideIndex * itemWidth);
+                var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
+                var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage)+'%';
+
+                if(!isIE) {
+                    jqoTrack.attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
+                } else {
+                    jqoTrack.attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
+                }
+            } 
+            else {
+                var iValue = (_iCurrentSlideIndex * 100);
+                var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
+                jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
+            }
+        }
+    };
+
+    var _nextSlide = function(e, arguments) {
+        if(e && e.preventDefault)
+            e.preventDefault();
+
+        if(e && e.stopPropagation)
+            e.stopPropagation();
 
         //get next gallery item
         var jqoGalleryItems = $('.viewer .gallery-item', '#demoGallery');
@@ -273,9 +309,9 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
         if(iNextIndex < iGallerySize) {
             var jqoListItems = $('.viewer ul li', '#demoGallery');
-            var itemWidth = jqoListItems.width().valueOf();
+            var itemWidth = Math.abs(jqoListItems.width()); //jqoListItems.width().valueOf();
             var jqoTrack= $('.viewer .track', '#demoGallery');
-            var iTrackWidth = jqoTrack.width();
+            var iTrackWidth = Math.abs(jqoTrack.width()); //jqoTrack.width();
             var isIE = _getIEVersion();
             var bCSSTransitions = Modernizr.csstransitions;
             var bCSSTransforms = Modernizr.csstransforms;
@@ -388,62 +424,21 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         var jqoTrackTranslateXValue;
 
         switch(sPhase) {
-            case "move":
-
-                var initial = _iCurrentSlideIndex * _getItemWidth();
-                var nPf;
-                var nPi = jqoTrackTranslateXValue; // jqoTrackTranslateXValue || 0; // != undefined ? jqoTrackTranslateXValue : 0; // == undefined ? 0 : jqoTrackTranslateXValue; //_nTranslateX;  
-                var nDistance = distance;
-                var sDirection = direction;
-                var nDuration = _ANIMATION_DURATION;
-
-                if(sDirection == "left") {
-
-                    console.log('moving left');
-                    /*
-                    console.log('nPi: '+nPi);
-                    nPf = nPi - distance;  console.log('nPf: '+nPf);
-                    nDuration = 0;
-                     _dragSlides(nPf, nDuration);
-                     _iCachedDistance = distance;
-                     */
-                }
-                else if(sDirection == "right") {
-                    /*
-                    iPosition = -1 * ((iItemWidth * _iCurrentSlideIndex) - iDistance);
-                    //iPosition = _iCurrentSlideIndex == 0 ? '' : '-' + iPosition;
-                    _dragSlides(iPosition, iDuration);
-                    */
-                }
-                else {
-                    return;
-                }
-                break;
-
-            case "cancel":
-                var iDuration = 600;
-                var iItemWidth = _getItemWidth();
-                var iPosition;
-                
-                iPosition = (iItemWidth * _iCurrentSlideIndex);
-                //- _dragSlides(iPosition, iDuration);
-
-                //_nTranslateX = _iCurrentSlideIndex;
-                /**/
-                break;
-
             case "end":
                 console.log('end');
 
                 var sDirection = direction;
                 if(sDirection == "left") {
-                    _nextSlide();
+                    //- _nextSlide();
+                    _swipeImages(event, "next");
                 }
                 else if(sDirection == "right") {
-                    _prevSlide();
+                    //- _prevSlide();
+                    _swipeImages(event, "prev");
                 }
                 break;
-
+            case "move":
+            case "cancel":
             default:
                 break;
         }
@@ -454,6 +449,9 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
         $('.controls .next', '#demoGallery').bind('click', _nextSlide);
         $('.controls .prev', '#demoGallery').bind('click', _prevSlide);
+
+        $('#csstransitions label').text(Modernizr.csstransitions);
+        $('#csstransforms label').text(Modernizr.csstransforms);
 
         var swipeOptions = {
             triggerOnTouchEnd: true,
