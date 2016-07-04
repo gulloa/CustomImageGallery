@@ -108,7 +108,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         _nTranslateX = position; console.log('translateX set to: '+_nTranslateX);
 
         iDuration = duration;
-        sPosition = !usePercentage ? position.toString() + 'px' : "";
+        sPosition = !usePercentage ? position.toString() + 'px' : position.toString() + '%';
         jqoTrack = jqo;
         bIsIE = _getIEVersion();
         bUsePercentage = usePercentage ? usePercentage : false;
@@ -143,7 +143,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         var jqoGalleryItems = $('.viewer .gallery-item', '#demoGallery');
         var iGallerySize = jqoGalleryItems.length;
         var iNextIndex = direction == "next" ? _iCurrentSlideIndex + 1 : _iCurrentSlideIndex - 1;
-        var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
+        var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  //-console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
 
         if (bCanSwipeNextIndex) {
             var jqoListItems = $('.viewer ul li', '#demoGallery');
@@ -159,14 +159,16 @@ App.Plugins.ImageGallery = (function ($, undefined) {
                 _iCurrentSlideIndex = iNextIndex;
                 var iValue = (_iCurrentSlideIndex * itemWidth);
                 var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
-                var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage)+'%';
+                var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
+                var nDuration = 0.6;
 
                 if(!isIE) {
-                    jqoTrack.attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
-                    //_setAnimationProperties(jqoTrack, iDuration, distance);
+                    //jqoTrack.attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
+                    _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
                 } else {
-                    jqoTrack.attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
+                    //jqoTrack.attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
                     //_setAnimationProperties(jqoTrack, iDuration, distance);
+                    _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
                 }
             } 
             else {
@@ -177,10 +179,11 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         }
     };
 
-    var _nextSlide = function() {
+    var _nextSlide = function(event) {
         _swipeImages(event, "next");
     }
-    var _prevSlide = function() {
+
+    var _prevSlide = function(event) {
         _swipeImages(event, "prev");
     }
 
@@ -215,8 +218,20 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         $('#csstransitions label').text(Modernizr.csstransitions);
         $('#csstransforms label').text(Modernizr.csstransforms);
 
+        // var oNode = document.getElementById('csstransitions'); 
+        // var sNodeText = oNode.textContent; 
+        // var oChildNode = oNode.querySelector('label');
+        // var sChildNodeText = oChildNode.textContent;
+        // console.log("sNodeText: "+sNodeText);
+        // console.log("sChildNodeText: "+sChildNodeText);
+        // oNode.textContent = "Supports css transitions?: ";
+        // oNode.appendChild(oChildNode);
+
+        // var sNodeValue = oNode.firstChild.nodeValue;
+        // console.log("Node value: "+sNodeValue);
+
         var swipeOptions = {
-            triggerOnTouchEnd: true,
+            triggerOnTouchEnd: false,
             swipeStatus: _swipeCallback, //_swipeStatus,
             allowPageScroll: "vertical",
             threshold: 90
@@ -225,6 +240,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         var jqoImgs = $("#demoGallery .viewer");
         jqoImgs.swipe(swipeOptions);
 
+        console.log("view initialized");
     };
 
     return {
