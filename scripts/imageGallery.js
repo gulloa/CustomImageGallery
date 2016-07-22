@@ -209,7 +209,29 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         }
     };
 
-    var _init = function () {
+    var _parseArrayToString = function(array) {
+
+    };
+
+    var _initImages = function(arrData) {
+        var arrImages = arrData;
+        var sImages = arrImages.toString();
+
+        if (typeof(Worker) !== "undefined") {
+            var wkItemBuilder = new Worker('/scripts/workers/galleryItemBuilder.js');
+            var obj = null;
+            
+            wkItemBuilder.addEventListener('message', function(e) {
+              console.log(e.data);
+            }, false);
+
+            wkItemBuilder.postMessage(sImages); // Send data to our worker.
+        } else {
+            // Sorry! No Web Worker support..
+        }
+    }
+
+    var _init = function (arrImagesURLs) {
         _extendJQueryEasing();
 
         $('.controls .next', '#demoGallery').bind('click', _nextSlide);
@@ -230,6 +252,22 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         // var sNodeValue = oNode.firstChild.nodeValue;
         // console.log("Node value: "+sNodeValue);
 
+
+        var arrImagesURLs = arrImagesURLs || new Array();
+        if (arrImagesURLs.length == 0) {
+            arrImagesURLs.push('001.jpg');
+            arrImagesURLs.push('002.jpg');
+            arrImagesURLs.push('003.jpg');
+            arrImagesURLs.push('004.jpg');
+            arrImagesURLs.push('005.jpg');
+            arrImagesURLs.push('006.jpg');
+            arrImagesURLs.push('007.jpg');
+            arrImagesURLs.push('008.jpg');
+            arrImagesURLs.push('009.jpg');
+        }
+        _initImages(arrImagesURLs);
+
+
         var swipeOptions = {
             triggerOnTouchEnd: false,
             swipeStatus: _swipeCallback, //_swipeStatus,
@@ -241,6 +279,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         jqoImgs.swipe(swipeOptions);
 
         console.log("view initialized");
+
     };
 
     return {
