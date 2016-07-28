@@ -209,6 +209,74 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         }
     };
 
+    var _swipeTrackCallback = function(event, phase, direction, distance) {
+        var sPhase = phase; 
+
+        switch(sPhase) {
+            case "end":
+                console.log('end');
+
+                var sDirection = direction;
+                if(sDirection == "left") {
+                    _swipeImages(event, "next");
+                }
+                else if(sDirection == "right") {
+                    _swipeImages(event, "prev");
+                }
+                break;
+            case "move":
+            case "cancel":
+            default:
+                break;
+        }
+    };
+
+    var _swipeTrackImages = function(e, direction) {
+        if(e && e.preventDefault)
+            e.preventDefault();
+
+        if(e && e.stopPropagation)
+            e.stopPropagation();
+
+        var jqoGalleryItems = $('.viewer .thumbnail', '#demoGallery');
+        var iGallerySize = jqoGalleryItems.length;
+        var iNextIndex = direction == "next" ? _iCurrentSlideIndex + 1 : _iCurrentSlideIndex - 1;
+        var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  //-console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
+
+        if (bCanSwipeNextIndex) {
+            var jqoListItems = $('.thumbnails ul li', '#demoGallery');
+            var itemWidth = Math.abs(jqoListItems.width()); 
+            var jqoTrack= $('.viewer .track', '#demoGallery');
+            var iTrackWidth = Math.abs(jqoTrack.width()); 
+            var isIE = _getIEVersion();
+            var bCSSTransitions = Modernizr.csstransitions;
+            var bCSSTransforms = Modernizr.csstransforms;
+            var bCSSAnimation = bCSSTransitions && bCSSTransforms; console.log('bCSSAnimation: '+bCSSAnimation);
+
+            if(bCSSAnimation) {
+                _iCurrentSlideIndex = iNextIndex;
+                var iValue = (_iCurrentSlideIndex * itemWidth);
+                var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
+                var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
+                var nDuration = 0.6;
+
+                if(!isIE) {
+                    //jqoTrack.attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
+                    _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                } else {
+                    //jqoTrack.attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
+                    //_setAnimationProperties(jqoTrack, iDuration, distance);
+                    _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                }
+            } 
+            else {
+                var iValue = (_iCurrentSlideIndex * 100);
+                var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
+                jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
+            }
+        }
+    };
+
     var _parseArrayToString = function(array) {
 
     };
@@ -276,6 +344,9 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         };
 
         var jqoImgs = $("#demoGallery .viewer");
+        jqoImgs.swipe(swipeOptions);
+
+        var jqoThumbnails = $("#demoGallery .thumbnails");
         jqoImgs.swipe(swipeOptions);
 
         console.log("view initialized");
