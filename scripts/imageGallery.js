@@ -1,4 +1,4 @@
-var App = window.App || {};
+var App = window.App || {};  
 App.Plugins = window.App.Plugins || {};
 App.Plugins.ImageGallery = (function ($, undefined) {
 
@@ -391,7 +391,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
 App.Plugins.CustomImageGallery = (function(){
 
-    var _oSettings;
+    var _oSettings, _sGalleryID = 'demoGallery';
 
     //construct instance
     (function(){
@@ -435,9 +435,66 @@ App.Plugins.CustomImageGallery = (function(){
     };
     var _destroy  = function() {};
 
-    //this.OnGalleryReady
+    //events handlers
     var _OnGalleryReady = function() {
+        // Create the event.
+        var customEvent = document.createEvent('HTMLEvents');
 
+        // Define that the event name is 'build'.
+        customEvent.initEvent('OnGalleryReady', true, true);
+
+        var elem = document.getElementById(_sGalleryID);
+        elem.dispatchEvent(customEvent);
+    };
+    var _OnNextSlide = function() {
+        // Create the event.
+        var customEvent = document.createEvent('HTMLEvents');
+
+        // Define that the event name is 'build'.
+        customEvent.initEvent('OnNextSlide', true, true);
+
+        var elem = document.getElementById(_sGalleryID);
+        elem.dispatchEvent(customEvent);
+    };
+    var _OnPrevSlide = function() {
+        // Create the event.
+        var customEvent = document.createEvent('HTMLEvents');
+
+        // Define that the event name is 'build'.
+        customEvent.initEvent('OnPrevSlide', true, true);
+
+        var elem = document.getElementById(_sGalleryID);
+        elem.dispatchEvent(customEvent);
+    };
+    var _OnPausePlayback = function() {
+        // Create the event.
+        var customEvent = document.createEvent('HTMLEvents');
+
+        // Define that the event name is 'build'.
+        customEvent.initEvent('OnPausePlayback', true, true);
+
+        var elem = document.getElementById(_sGalleryID);
+        elem.dispatchEvent(customEvent);
+    };
+    var _OnResumePlayback = function() {
+        // Create the event.
+        var customEvent = document.createEvent('HTMLEvents');
+
+        // Define that the event name is 'build'.
+        customEvent.initEvent('OnResumePlayback', true, true);
+
+        var elem = document.getElementById(_sGalleryID);
+        elem.dispatchEvent(customEvent);
+    };
+    var _OnGalleryDestroyed = function() {
+        // Create the event.
+        var customEvent = document.createEvent('HTMLEvents');
+
+        // Define that the event name is 'build'.
+        customEvent.initEvent('OnGalleryDestroyed', true, true);
+
+        var elem = document.getElementById(_sGalleryID);
+        elem.dispatchEvent(customEvent);
     };
 
 
@@ -449,6 +506,131 @@ App.Plugins.CustomImageGallery = (function(){
         PausePlayback: _pause,
         Destroy: _destroy,
         Init: _init
+    }
+
+})();
+
+
+App.Plugins = (function(){
+
+    var CustomImageGallery = function(){
+
+        var _oSettings, _sGalleryID = 'demoGallery';
+
+        //controllers
+        var _next = function() {};
+        var _previous = function() {};
+        var _goToSlide = function() {};
+        var _pause = function() {};
+        var _play = function() {};
+        var _togglePlayback = function() {};
+        var _preload = function() {};
+        var _getImages = function() {};
+        var _createGalleryItems = function() {};
+        var _renderItems = function() {};
+        var _init = function(oSettings) {
+            _oSettings = {
+                DataProvider: null || oSettings.DataProvider, //['JSON', <json>] | ['Array', <array>] | ['Object', <object>];
+                Track: {
+                    visible: 'always' || oSettings.Track.visible, // 'always' | 'never' | 'desktop'
+                    cluster: 5 || oSettings.Track.cluster, // 3 - 10
+                    swipe: true || oSettings.Track.swipe  // true | false
+                },
+                Autoplay: true || oSettings.Autoplay, // true | false
+                HoldTime: 3000 || oSettings.HoldTime, // milliseconds
+                TransitionTime: 600 || oSettings.TransitionTime, // milliseconds
+                UseImageOptimization: true || oSettings.UseImageOptimization, // true | false
+                ImageOptimization: false || {
+                    width: 800 || oSettings.ImageOptimization.width, //pixels | auto
+                    height: 600 || oSettings.ImageOptimization.height, //pixels | auto
+                    constrain: true || oSettings.ImageOptimization.constrain, // true | false
+                    queryString: false || oSettings.ImageOptimization.queryString, // '?queryStringParameters' || false
+                }
+            }
+
+            if(_oSettings.DataProvider != null) {
+                if (typeof(Worker) !== "undefined") {
+                    console.log('web workers supported: ' + Modernizr.webworkers);
+                }
+            }
+        };
+        var _destroy  = function() {};
+
+        //events constructors
+        var _OnGalleryReady = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('OnGalleryReady', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+        };
+        var _OnNextSlide = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('OnNextSlide', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+        };
+        var _OnPrevSlide = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('OnPrevSlide', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+        };
+        var _OnPausePlayback = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('OnPausePlayback', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+        };
+        var _OnResumePlayback = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('OnResumePlayback', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+        };
+        var _OnGalleryDestroyed = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('OnGalleryDestroyed', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+        };
+
+        //expose methods
+        return {
+            NextSlide: _next,
+            PreviousSlide: _previous,
+            GoToSlide: _goToSlide,
+            PausePlayback: _pause,
+            Destroy: _destroy,
+            Init: _init
+        }
+    }
+
+    return {
+        CustomImageGallery: CustomImageGallery
     }
 
 })();
