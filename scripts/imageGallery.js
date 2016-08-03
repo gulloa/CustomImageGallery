@@ -177,6 +177,15 @@ App.Plugins.ImageGallery = (function ($, undefined) {
                 jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
             }
         }
+
+        // Create the event.
+        var customEvent = document.createEvent('HTMLEvents');
+
+        // Define that the event name is 'build'.
+        customEvent.initEvent('onSlide', true, true);
+
+        var elem = document.getElementById('demoGallery');
+        elem.dispatchEvent(customEvent);
     };
 
     var _nextSlide = function(event) {
@@ -351,6 +360,27 @@ App.Plugins.ImageGallery = (function ($, undefined) {
 
         console.log("view initialized");
 
+        // var evObj = document.createEvent('HTMLEvents');
+        // document.body.addEventListener('OnGalleryReady', function(e){ alert(e === evObj); },true);
+        // evObj.initEvent('OnGalleryReady', true, true);
+
+        // Create the event.
+        // var event = document.createEvent('Event');
+
+        // Define that the event name is 'build'.
+        // event.initEvent('onSlide', true, true);
+
+        // Listen for the event.
+        var elem = document.getElementById('demoGallery');
+        elem.addEventListener('onSlide', function (e) {
+          // e.target matches elem
+          var evt  = e;
+          console.log(e);
+        }, false);
+
+        // target can be any Element or other EventTarget.
+        //elem.dispatchEvent(event);
+
     };
 
     return {
@@ -358,3 +388,67 @@ App.Plugins.ImageGallery = (function ($, undefined) {
     }
 
 })(jQuery, undefined);
+
+App.Plugins.CustomImageGallery = (function(){
+
+    var _oSettings;
+
+    //construct instance
+    (function(){
+        // var evObj = document.createEvent('HTMLEvents');
+        // document.body.addEventListener('OnGalleryReady', function(e){ alert(e === evObj); },true);
+        // evObj.initEvent('OnGalleryReady', true, true);
+        //document.body.dispatchEvent(evObj); // Shows alert, "true"
+    })();
+
+    //controllers
+    var _next = function() {};
+    var _previous = function() {};
+    var _goToSlide = function() {};
+    var _pause = function() {};
+    var _play = function() {};
+    var _togglePlayback = function() {};
+    var _preload = function() {};
+    var _getImages = function() {};
+    var _createGalleryItems = function() {};
+    var _renderItems = function() {};
+    var _init = function(oSettings) {
+        _oSettings = {
+            DataProvider: null, //oSettings.DataProvider;
+            Track: {
+                visible: 'always', // 'always' | 'never' | 'desktop'
+                cluster: 5, // 3 - 10
+                swipe: true  // true | false
+            },
+            Autoplay: true, // true | false
+            HoldTime: 3000, // milliseconds
+            TransitionTime: 600, // milliseconds
+            UseImageOptimization: true, // true | false
+            ImageOptimization: {
+                width: 800,  //pixels | auto
+                height: 600, //pixels | auto
+                constrain: true, // true | false
+                queryString: '?weight=800&height=300&crop&Constrain=true' // '?queryStringParameters' || false
+            }
+
+        }
+    };
+    var _destroy  = function() {};
+
+    //this.OnGalleryReady
+    var _OnGalleryReady = function() {
+
+    };
+
+
+    //exposed methods
+    return {
+        NextSlide: _next,
+        PreviousSlide: _previous,
+        GoToSlide: _goToSlide,
+        PausePlayback: _pause,
+        Destroy: _destroy,
+        Init: _init
+    }
+
+})();
