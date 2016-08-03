@@ -14,3 +14,28 @@ self.addEventListener('message', function(e) {
 	self.postMessage(JSON.stringify(arrData));
 
 }, false);
+
+var _calculateRenderingValues = function(q,v) {
+    var nQuantityOfElements = q;
+    var nQuantityOfElementsVisible = v;
+    var nClusters = Math.ceil(q/v);
+    var nTrackWidth, nThumnailWidth;
+
+    nThumnailWidth = 100/nQuantityOfElementsVisible;
+    nTrackWidth = nThumnailWidth * nQuantityOfElements;
+
+    return {
+        ThumbnailWidth: nThumnailWidth,
+        TrackWidth: nTrackWidth,
+        Clusters: nClusters,
+        ItemsPerCluster: nQuantityOfElementsVisible,
+        TotalItems: nQuantityOfElements
+    }
+};
+
+var _createGalleryTrackCode = function(q,v) {
+
+};
+var _createGallerySlidesCode = function(q,v) {
+
+};
