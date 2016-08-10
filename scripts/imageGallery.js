@@ -549,6 +549,18 @@ App.Plugins = (function(){
             }
 
             if(_oSettings.DataProvider != null) {
+                var oDataProvider = _oSettings.DataProvider;
+                console.log('is json?: ' + oDataProvider.Type.toLowerCase());
+                console.log('is an array?: ' + Array.isArray(oDataProvider.Data));
+                console.log('is an object?: ' + typeof oDataProvider);
+                if(oDataProvider.Type.toLowerCase() == 'json' && Array.isArray(oDataProvider.Data)) {
+                    //do something to pre-render images
+                    console.log('is json: ' + Array.isArray(oDataProvider.Data));
+                }
+                if(oDataProvider.Type.toLowerCase() == 'ajax' && typeof oDataProvider === 'object') {
+                    //do something to pre-render images
+                    console.log('is ajax: ' + oDataProvider);
+                }
                 if (typeof(Worker) !== "undefined") {
                     console.log('web workers supported: ' + Modernizr.webworkers);
                 }
