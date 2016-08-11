@@ -1,41 +1,51 @@
-self.addEventListener('message', function(e) {
-	var sData = e.data;
-	console.log('sData: '+ sData);
+(function(self){
+    var _calculateRenderingValues = function(q,v) {
+        var nQuantityOfElements = q;
+        var nQuantityOfElementsVisible = v;
+        var nClusters = Math.ceil(q/v);
+        var nTrackWidth, nThumnailWidth;
 
-	var arrData = sData.split(',');
-	var iDataLength = arrData.length;
+        nThumnailWidth = 100/nQuantityOfElementsVisible;
+        nTrackWidth = nThumnailWidth * nQuantityOfElements;
 
-	for(var i = 0; i<iDataLength; i++) {
-		var sItem = arrData[i];
-		console.log('sItem: '+ sItem);
-	}
+        return {
+            ThumbnailWidth: nThumnailWidth,
+            TrackWidth: nTrackWidth,
+            Clusters: nClusters,
+            ItemsPerCluster: nQuantityOfElementsVisible,
+            TotalItems: nQuantityOfElements
+        }
+    };
 
-	console.log('data logged in console');
-	self.postMessage(JSON.stringify(arrData));
+    var _createGalleryTrackCode = function(q,v) {
 
-}, false);
+    };
+    var _createGallerySlidesCode = function(q,v) {
+    };
 
-var _calculateRenderingValues = function(q,v) {
-    var nQuantityOfElements = q;
-    var nQuantityOfElementsVisible = v;
-    var nClusters = Math.ceil(q/v);
-    var nTrackWidth, nThumnailWidth;
+    self.addEventListener('message', function(e) {
+        var oData = JSON.parse(e.data);
+        var oConfig = oData.Track;
+        var sImages = oData.Data;
+        console.log('PRE-RENDERING');
+        console.log('oConfig: '+ oConfig);
+        //console.log('sImages: '+ sImages);
+        
+        var arrData = JSON.parse(sImages);
+        console.log('arrData: '+ arrData);
 
-    nThumnailWidth = 100/nQuantityOfElementsVisible;
-    nTrackWidth = nThumnailWidth * nQuantityOfElements;
+        return;
 
-    return {
-        ThumbnailWidth: nThumnailWidth,
-        TrackWidth: nTrackWidth,
-        Clusters: nClusters,
-        ItemsPerCluster: nQuantityOfElementsVisible,
-        TotalItems: nQuantityOfElements
-    }
-};
+        var arrData = sData.split(',');
+        var iDataLength = arrData.length;
 
-var _createGalleryTrackCode = function(q,v) {
+        for(var i = 0; i<iDataLength; i++) {
+            var sItem = arrData[i];
+            console.log('sItem: '+ sItem);
+        }
 
-};
-var _createGallerySlidesCode = function(q,v) {
+        console.log('data logged in console');
+        self.postMessage(JSON.stringify(arrData));
 
-};
+    }, false);
+})(this);

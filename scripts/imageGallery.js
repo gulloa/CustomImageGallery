@@ -515,7 +515,8 @@ App.Plugins = (function(){
 
     var CustomImageGallery = function(){
 
-        var _oSettings, _sGalleryID = 'demoGallery';
+        var _oSettings, _sGalleryID = 'demoGallery', _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
+        var _wkDataParser, _wkItemBuilder;
 
         //controllers
         var _next = function() {};
@@ -525,9 +526,47 @@ App.Plugins = (function(){
         var _play = function() {};
         var _togglePlayback = function() {};
         var _preload = function() {};
-        var _getImages = function() {};
-        var _createGalleryItems = function() {};
-        var _renderItems = function() {};
+        var _getImages = function(sStringifiedJSON) {
+            if(_webworkersSupported) {
+                var sData = sStringifiedJSON;
+                _wkDataParser.postMessage(sData); // Send data to our worker.
+                _wkDataParser.addEventListener('message', function(e) {
+                    var sData = e.data;  // console.log('e.data: '); console.log(e.data);
+                    var bTrackEnabled = _oSettings.Track.visible;
+                    var oTrackSettings;
+                    var oFullData = {}
+                    if(bTrackEnabled) {
+                        oTrackSettings = _oSettings.Track;
+                        oFullData.Track = _oSettings.Track;
+                        oFullData.Data = sData;
+                    }
+                    _preRenderItems(JSON.stringify(oFullData));
+                }, false);
+            } else {
+                console.log('UPS! webworkers not supported');
+                // process all here...
+            }
+        };
+        var _preRenderItems = function(sStringifiedJSON) {
+            if(_webworkersSupported) {         
+                var sData = sStringifiedJSON;
+                _wkItemBuilder.postMessage(sData); // Send data to our worker.
+                _wkItemBuilder.addEventListener('message', function(e) {
+                    var sData = e.data;  // console.log('e.data: '); console.log(e.data);
+                    _renderItems(sData); //appending gallery to DOM
+                }, false);
+            } else {
+                console.log('UPS! webworkers not supported');
+                // process all here...
+            }
+        };
+        var _renderItems = function() {console.log('rendering gallery at DOM')};
+        var _startWorkers = function() {
+            if(_webworkersSupported) {
+                _wkDataParser = new Worker('/scripts/workers/dataProvider.js'); 
+                _wkItemBuilder = new Worker('/scripts/workers/galleryItemBuilder.js');
+            }
+        };
         var _init = function(oSettings) {
             _oSettings = {
                 DataProvider: null || oSettings.DataProvider, //['JSON', <json>] | ['Array', <array>] | ['Object', <object>];
@@ -548,14 +587,25 @@ App.Plugins = (function(){
                 }
             }
 
+            if(_webworkersSupported) {
+                _startWorkers();
+            }
+
             if(_oSettings.DataProvider != null) {
                 var oDataProvider = _oSettings.DataProvider;
+
                 console.log('is json?: ' + oDataProvider.Type.toLowerCase());
                 console.log('is an array?: ' + Array.isArray(oDataProvider.Data));
                 console.log('is an object?: ' + typeof oDataProvider);
+
                 if(oDataProvider.Type.toLowerCase() == 'json' && Array.isArray(oDataProvider.Data)) {
                     //do something to pre-render images
                     console.log('is json: ' + Array.isArray(oDataProvider.Data));
+
+                    var arrData = oDataProvider.Data;;
+                    var sData = JSON.stringify(arrData);
+                    _getImages(sData);
+
                 }
                 if(oDataProvider.Type.toLowerCase() == 'ajax' && typeof oDataProvider === 'object') {
                     //do something to pre-render images
@@ -564,6 +614,8 @@ App.Plugins = (function(){
                 if (typeof(Worker) !== "undefined") {
                     console.log('web workers supported: ' + Modernizr.webworkers);
                 }
+            } else {
+                console.log('Error: no data input was provided')
             }
         };
         var _destroy  = function() {};
