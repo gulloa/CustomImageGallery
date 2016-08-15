@@ -21,18 +21,30 @@
 
     };
     var _createGallerySlidesCode = function(q,v) {
+        var sTemplate;
+
+        
     };
 
     self.addEventListener('message', function(e) {
         var oData = JSON.parse(e.data);
-        var oConfig = oData.Track;
-        var sImages = oData.Data;
+        var oConfig = oData.settings;
+        var sImages = oData.data;
         console.log('PRE-RENDERING');
-        console.log('oConfig: '+ oConfig);
-        //console.log('sImages: '+ sImages);
+        console.log('oConfig: ');
+        console.log(oConfig);
         
         var arrData = JSON.parse(sImages);
-        console.log('arrData: '+ arrData);
+        console.log('arrData: ');
+        console.log(arrData);
+
+        //take a look to configuration and find out what the developer needs to be rendered
+        // first, lets see how much items we will have to pre-render
+        var oRenderingProperties = _calculateRenderingValues(arrData.length, 1);
+        console.log('oRenderingProperties: ');
+        console.log(oRenderingProperties);
+
+
 
         return;
 

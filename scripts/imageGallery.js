@@ -531,16 +531,19 @@ App.Plugins = (function(){
                 var sData = sStringifiedJSON;
                 _wkDataParser.postMessage(sData); // Send data to our worker.
                 _wkDataParser.addEventListener('message', function(e) {
-                    var sData = e.data;  // console.log('e.data: '); console.log(e.data);
-                    var bTrackEnabled = _oSettings.Track.visible;
-                    var oTrackSettings;
-                    var oFullData = {}
-                    if(bTrackEnabled) {
-                        oTrackSettings = _oSettings.Track;
-                        oFullData.Track = _oSettings.Track;
-                        oFullData.Data = sData;
+                    var sParsedData = e.data;  // console.log('e.data: '); console.log(e.data);
+                    var oData = {
+                        data: sParsedData,
+                        settings: {
+                            captions: _oSettings.Captions,
+                            track: _oSettings.Track,
+                            autoplay: _oSettings.Autoplay,
+                            holdtime: _oSettings.HoldTime,
+                            transition: _oSettings.TransitionTime,
+                            optimization: _oSettings.UseImageOptimization ? _oSettings.ImageOptimization : null
+                        }
                     }
-                    _preRenderItems(JSON.stringify(oFullData));
+                    _preRenderItems(JSON.stringify(oData));
                 }, false);
             } else {
                 console.log('UPS! webworkers not supported');
@@ -570,6 +573,7 @@ App.Plugins = (function(){
         var _init = function(oSettings) {
             _oSettings = {
                 DataProvider: null || oSettings.DataProvider, //['JSON', <json>] | ['Array', <array>] | ['Object', <object>];
+                Captions: true || oSettings.Captions,  // true | false
                 Track: {
                     visible: 'always' || oSettings.Track.visible, // 'always' | 'never' | 'desktop'
                     cluster: 5 || oSettings.Track.cluster, // 3 - 10
@@ -602,7 +606,7 @@ App.Plugins = (function(){
                     //do something to pre-render images
                     console.log('is json: ' + Array.isArray(oDataProvider.Data));
 
-                    var arrData = oDataProvider.Data;;
+                    var arrData = oDataProvider.Data;
                     var sData = JSON.stringify(arrData);
                     _getImages(sData);
 
@@ -615,7 +619,8 @@ App.Plugins = (function(){
                     console.log('web workers supported: ' + Modernizr.webworkers);
                 }
             } else {
-                console.log('Error: no data input was provided')
+                console.log('Error: no data input was provided');
+                return;
             }
         };
         var _destroy  = function() {};
