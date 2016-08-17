@@ -572,6 +572,7 @@ App.Plugins = (function(){
         };
         var _init = function(oSettings) {
             _oSettings = {
+                /*
                 DataProvider: null || oSettings.DataProvider, //['JSON', <json>] | ['Array', <array>] | ['Object', <object>];
                 Captions: true || oSettings.Captions,  // true | false
                 Track: {
@@ -589,35 +590,36 @@ App.Plugins = (function(){
                     constrain: true || oSettings.ImageOptimization.constrain, // true | false
                     queryString: false || oSettings.ImageOptimization.queryString, // '?queryStringParameters' || false
                 }
+                */
+                data: null || oSettings.data, // array of objects
+                id: '01',
+                captions: true || oSettings.captions,  // true | false
+                autoplay: true || oSettings.autoplay,  // true | false
+                thumbnails: {
+                    visible: 'always' || oSettings.thumbnails.visible, // 'always' | 'never' | 'desktop'
+                    cluster: 5 || oSettings.thumbnails.cluster // 3 - 10
+                },
+                animation: {
+                    holdTime: 3000 || oSettings.animation.holdTime, // milliseconds
+                    transitionTime: 600 || oSettings.animation.transitionTime // milliseconds
+                },
+                optimization: {
+                    enable: true || oSettings.optimization.enable, // true | false
+                    constrain: true || oSettings.optimization.constrain, // true | falses
+                    dynamic: true || oSettings.optimization.dynamic, // true | false
+                    queryString: null || oSettings.optimization.queryString // '?queryStringParameters' || false
+                }
             }
 
             if(_webworkersSupported) {
                 _startWorkers();
             }
 
-            if(_oSettings.DataProvider != null) {
-                var oDataProvider = _oSettings.DataProvider;
+            if(_oSettings.data != null) {
+                var sData = JSON.stringify(_oSettings.data);
 
-                console.log('is json?: ' + oDataProvider.Type.toLowerCase());
-                console.log('is an array?: ' + Array.isArray(oDataProvider.Data));
-                console.log('is an object?: ' + typeof oDataProvider);
+                _getImages(sData);
 
-                if(oDataProvider.Type.toLowerCase() == 'json' && Array.isArray(oDataProvider.Data)) {
-                    //do something to pre-render images
-                    console.log('is json: ' + Array.isArray(oDataProvider.Data));
-
-                    var arrData = oDataProvider.Data;
-                    var sData = JSON.stringify(arrData);
-                    _getImages(sData);
-
-                }
-                if(oDataProvider.Type.toLowerCase() == 'ajax' && typeof oDataProvider === 'object') {
-                    //do something to pre-render images
-                    console.log('is ajax: ' + oDataProvider);
-                }
-                if (typeof(Worker) !== "undefined") {
-                    console.log('web workers supported: ' + Modernizr.webworkers);
-                }
             } else {
                 console.log('Error: no data input was provided');
                 return;
