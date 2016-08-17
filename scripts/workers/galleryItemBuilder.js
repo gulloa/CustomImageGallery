@@ -16,15 +16,36 @@
             TotalItems: nQuantityOfElements
         }
     };
+    var _createGalleryTrackCode = function(q,v) {};
+    var _createGallerySlidesCode = function(oData, bUseCaptions, oRenderingProperties) {
+        var arrItemsCollection = oData;
+        var bUseCaptions = bUseCaptions;
+        var oRenderingProperties = oRenderingProperties;
+        var iDataLength = arrItemsCollection.length;
+        var sResult = '';
 
-    var _createGalleryTrackCode = function(q,v) {
-
+        for(var i=0; i<iDataLength; i++) {
+            var oItemData = arrItemsCollection[i];
+            var sViewType = oItemData.viewtype;
+            var sItemMarkup = '';
+            // if viewtype is image, request an inner service to render as image item. Pass captions and  data
+            // if viewtype is vide, request an inner services to render as ytvideo item. Pass data   
+            if(sViewType && sViewType == 'image') {
+                sItemMarkup = _buildImageItem(bUseCaptions, oItemData);
+            }
+            if(sViewType && sViewType == 'video') {
+                sItemMarkup = _buildVideoItem(bUseCaptions, oItemData);
+            }
+        }
     };
-    var _createGallerySlidesCode = function(q,v) {
-        var sTemplate;
-
+    var _buildImageItem = function() {
         
     };
+    var _buildVideoItem = function() {};
+
+    var _createSlideItems = function() {};
+    var _concatFullTrackMarkup = function() {};
+    var _wrapIntoViewer = function() {};
 
     self.addEventListener('message', function(e) {
         var oData = JSON.parse(e.data);
@@ -33,6 +54,10 @@
         console.log('PRE-RENDERING');
         console.log('oConfig: ');
         console.log(oConfig);
+        // console.log('sImages length: ' + sImages.length);
+        // console.log('sImages');
+        // console.log(sImages);
+
         
         var arrData = JSON.parse(sImages);
         console.log('arrData: ');
@@ -44,6 +69,9 @@
         console.log('oRenderingProperties: ');
         console.log(oRenderingProperties);
 
+        //pre-render items
+        _createGallerySlidesCode(arrData, oConfig.captions, oRenderingProperties);
+        
 
 
         return;
