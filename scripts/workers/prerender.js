@@ -36,31 +36,38 @@
 			sOptimizationQueryString = data.optimization.queryString;
 		}
 			
-		// determine how track will be built
-		if(sThumbnails == 'always' || sThumbnails == 'desktop') {
-			oTrackRenderingValues = _calculateRenderingValues(iGalleryLength, iThumbnailsClusterSize);
-		}		
-
-		// var arrItemsCollection = arrData;
-  //       var bUseCaptions = bCaptions;
-  //       var oRenderingProperties = oRenderingProperties;
-  //       var iDataLength = arrItemsCollection.length;
-        var sResult = '';
+        var arrVideos = new Array();
+        var sItemsPreRendered = '';
 
         for(var i=0; i<iGalleryLength; i++) {
             var oItemData = arrItemsCollection[i];
             var sViewType = oItemData.videoID != null ? 'video' : 'image';
             var sItemMarkup = '';
-            // if viewtype is image, request an inner service to render as image item. Pass captions and  data
-            // if viewtype is vide, request an inner services to render as ytvideo item. Pass data   
+
             if(sViewType && sViewType == 'image') {
                 sItemMarkup = _buildImageItem(bCaptions, oItemData);
             }
             if(sViewType && sViewType == 'video') {
-                sItemMarkup = _buildVideoItem(bCaptions, oItemData);
+                arrVideos.push(oItemData.videoID);
+                sItemMarkup = _buildVideoItem(oItemData, arrVideos.length);
             }
+
+            sItemsPreRendered += sItemMarkup;
         }
 
+        var sGalleryTrack, 
+            sGalleryViewer =    '<div class="viewer">
+                                    <ul class="list-inline clearfix track">'+sItemsPreRendered+'</ul>'
+                                '</div>';
+
+        // determine how track will be built (if enabled)
+        if(sThumbnails == 'always' || sThumbnails == 'desktop') {
+            oTrackRenderingValues = _calculateRenderingValues(iGalleryLength, iThumbnailsClusterSize);
+
+            sGalleryTrack = '<div class="viewer">
+                                <ul class="list-inline clearfix track">'+sItemsPreRendered+'</ul>'
+                            '</div>';
+        }
 	};
 
 	var _calculateRenderingValues = function(q,v) {
@@ -81,12 +88,30 @@
         }
     };
 
-    var _buildImageItem = function() {
-    	// TO DO
+    var _buildImageItem = function(bUseCaptions, oData) {
+        var oItemData = oData;
+        var sItemCaption = bUseCaptions ? '<figcaption>'+oItemData.caption+'</figcaption>' : '';
+        var sItemMarkup =  '<li>
+                                <figure class="gallery-item">
+                                    <img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'">'+sItemCaption+' />
+                                </figure>
+                            </li>';
+        return sItemMarkup;
     };
 
-    var _buildVideoItem = function() {
+    var _buildVideoItem = function(oData, iAmountOfVideos) {
     	// TO DO
+        var oItemData = oData;
+        var sYTVideoID = oData.videoID;
+        var iVideoNumber = iAmountOfVideos + 1;
+        var sItemMarkup =  '<li>
+                                <figure class="gallery-item">
+                                    <div id="video-'+iVideoNumber+'" data-ytid="'+sYTVideoID+'">
+                                        <div class="video-wrapper embed-responsive embed-responsive-16by9"></div>
+                                    </div>
+                                </figure>
+                            </li>';
+        return sItemMarkup;
     };
 
 })(this);
