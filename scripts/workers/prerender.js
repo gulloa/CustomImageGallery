@@ -37,22 +37,37 @@
 		}
 			
         var arrVideos = new Array();
-        var sItemsPreRendered = '';
+        var sViewerItemsPreRendered = '';
+        var sTrackItemsPreRendered = '';
 
         for(var i=0; i<iGalleryLength; i++) {
             var oItemData = arrItemsCollection[i];
             var sViewType = oItemData.videoID != null ? 'video' : 'image';
-            var sItemMarkup = '';
+            var sViewerItemMarkup = '';
+            var sTrackItemMarkup = '';
 
             if(sViewType && sViewType == 'image') {
-                sItemMarkup = _buildImageItem(bCaptions, oItemData);
+
+                //generate viewer item
+                sViewerItemMarkup = _buildImageItem(bCaptions, oItemData);
+
+                //generate track item
+                //TO DO
+                //sTrackItemMarkup = _buildTrackImageItem(oItemData);
             }
             if(sViewType && sViewType == 'video') {
+
+                //generate viewer item
                 arrVideos.push(oItemData.videoID);
-                sItemMarkup = _buildVideoItem(oItemData, arrVideos.length);
+                sViewerItemMarkup = _buildVideoItem(oItemData, arrVideos.length);
+
+                //generate track item
+                //TO DO
+                //sTrackItemMarkup = _buildTrackImageItem(oItemData);
             }
 
-            sItemsPreRendered += sItemMarkup;
+            sViewerItemsPreRendered += sViewerItemMarkup;
+            sTrackItemsPreRendered += sViewerItemMarkup;
         }
 
         var sGalleryTrack, 
@@ -64,9 +79,11 @@
         if(sThumbnails == 'always' || sThumbnails == 'desktop') {
             oTrackRenderingValues = _calculateRenderingValues(iGalleryLength, iThumbnailsClusterSize);
 
-            sGalleryTrack = '<div class="viewer">
-                                <ul class="list-inline clearfix track">'+sItemsPreRendered+'</ul>'
-                            '</div>';
+            sGalleryTrack = '<div class="thumbnails">
+                                <div class="track">
+                                    <ul class="list-inline clearfix">'+sItemsPreRendered+'</ul>
+                                </div>
+                            </div>';
         }
 	};
 
