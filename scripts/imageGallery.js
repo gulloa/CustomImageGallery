@@ -516,7 +516,7 @@ App.Plugins = (function(){
     var CustomImageGallery = function(){
 
         var _oSettings, _sGalleryID = 'demoGallery', _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
-        var _wkDataParser, _wkItemBuilder;
+        var _wkDataParser, _wkItemBuilder, _wkPreRender;
 
         //controllers
         var _next = function() {};
@@ -526,28 +526,17 @@ App.Plugins = (function(){
         var _play = function() {};
         var _togglePlayback = function() {};
         var _preload = function() {};
-        var _getImages = function(sStringifiedJSON) {
+        var _parseData = function(sStringifiedJSON) {
             if(_webworkersSupported) {
-                var sData = sStringifiedJSON;
+                var sParsedData, sData = sStringifiedJSON; console.log('sData: '); console.log(sData);
                 _wkDataParser.postMessage(sData); // Send data to our worker.
                 _wkDataParser.addEventListener('message', function(e) {
-                    var sParsedData = e.data;  // console.log('e.data: '); console.log(e.data);
-                    var oData = {
-                        data: sParsedData,
-                        settings: {
-                            captions: _oSettings.Captions,
-                            track: _oSettings.Track,
-                            autoplay: _oSettings.Autoplay,
-                            holdtime: _oSettings.HoldTime,
-                            transition: _oSettings.TransitionTime,
-                            optimization: _oSettings.UseImageOptimization ? _oSettings.ImageOptimization : null
-                        }
-                    }
-                    _preRenderItems(JSON.stringify(oData));
+                    sParsedData = e.data;  // console.log('e.data: '); console.log(e.data);
+                    return sParsedData;
                 }, false);
             } else {
                 console.log('UPS! webworkers not supported');
-                // process all here...
+                // process all here... (fallback)
             }
         };
         var _preRenderItems = function(sStringifiedJSON) {
@@ -563,34 +552,25 @@ App.Plugins = (function(){
                 // process all here...
             }
         };
+
         var _renderItems = function() {console.log('rendering gallery at DOM')};
+        var _render = function(sStringifiedJSON) {
+            var sData = sStringifiedJSON;
+            //_wkPreRender.postMessage(sData); 
+        };
+        var _preRender = function(sStringifiedJSON) {
+            var sData = sStringifiedJSON; 
+            _wkPreRender.postMessage(sData); 
+        };
         var _startWorkers = function() {
             if(_webworkersSupported) {
-                _wkDataParser = new Worker('/scripts/workers/dataProvider.js'); 
-                _wkItemBuilder = new Worker('/scripts/workers/galleryItemBuilder.js');
+                // _wkDataParser = new Worker('/scripts/workers/dataProvider.js'); 
+                // _wkItemBuilder = new Worker('/scripts/workers/galleryItemBuilder.js');
+                _wkPreRender = new Worker('/scripts/workers/prerender.js');
             }
         };
         var _init = function(oSettings) {
             _oSettings = {
-                /*
-                DataProvider: null || oSettings.DataProvider, //['JSON', <json>] | ['Array', <array>] | ['Object', <object>];
-                Captions: true || oSettings.Captions,  // true | false
-                Track: {
-                    visible: 'always' || oSettings.Track.visible, // 'always' | 'never' | 'desktop'
-                    cluster: 5 || oSettings.Track.cluster, // 3 - 10
-                    swipe: true || oSettings.Track.swipe  // true | false
-                },
-                Autoplay: true || oSettings.Autoplay, // true | false
-                HoldTime: 3000 || oSettings.HoldTime, // milliseconds
-                TransitionTime: 600 || oSettings.TransitionTime, // milliseconds
-                UseImageOptimization: true || oSettings.UseImageOptimization, // true | false
-                ImageOptimization: false || {
-                    width: 800 || oSettings.ImageOptimization.width, //pixels | auto
-                    height: 600 || oSettings.ImageOptimization.height, //pixels | auto
-                    constrain: true || oSettings.ImageOptimization.constrain, // true | false
-                    queryString: false || oSettings.ImageOptimization.queryString, // '?queryStringParameters' || false
-                }
-                */
                 data: null || oSettings.data, // array of objects
                 id: '01',
                 captions: true || oSettings.captions,  // true | false
@@ -611,15 +591,24 @@ App.Plugins = (function(){
                 }
             }
 
-            if(_webworkersSupported) {
-                _startWorkers();
-            }
+            console.log('init- settings');
+            console.log(_oSettings);
 
             if(_oSettings.data != null) {
-                var sData = JSON.stringify(_oSettings.data);
+                if(_webworkersSupported) {
+                    _startWorkers();
 
-                _getImages(sData);
+                    _wkPreRender.addEventListener('message', function(e) {
+                        var sMarkup = e.data;  console.log('e.data: '); console.log(e.data);
+                        _render(sMarkup);
+                    }, false);
 
+                    var sData = JSON.stringify(_oSettings);
+                    _preRender(sData);
+                }
+                else {
+                    //workers fallback
+                }
             } else {
                 console.log('Error: no data input was provided');
                 return;
