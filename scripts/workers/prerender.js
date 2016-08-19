@@ -8,7 +8,8 @@
 		var sMarkup = _createGallery(oSettings);
 
 		// post result
-		self.postMessage(JSON.stringify(sMarkup));
+		//-self.postMessage(JSON.stringify(sMarkup));
+        self.postMessage(sMarkup);
 
 	}, false);
 
@@ -16,13 +17,13 @@
 
 		// cache data
 		var arrItemsCollection = data.data,
-			iGalleryLength = arrItemsCollection.length;
+			iGalleryLength = arrItemsCollection.length; console.log(data.thumbnails.visible + ' show thumbnails');
 
 		// cache all settings
 		var bAutoplay = data.autoplay,
 			bCaptions = data.captions,
 			sId = data.id,
-			sThumbnails = data.thumbnails,
+			sThumbnails = data.thumbnails.visible != undefined ? data.thumbnails.visible : 'never', 
 			iThumbnailsClusterSize = data.thumbnails.cluster,
 			iAnimationHoldTime = data.animation.holdTime,
 			iAnimationTransitionTime = data.animation.holdTime,
@@ -37,54 +38,53 @@
 		}
 			
         var arrVideos = new Array();
-        var sViewerItemsPreRendered = '';
-        var sTrackItemsPreRendered = '';
+        var sViewerItems = '';
+        var sThumbnailsItems = '';
 
         for(var i=0; i<iGalleryLength; i++) {
             var oItemData = arrItemsCollection[i];
             var sViewType = oItemData.videoID != null ? 'video' : 'image';
-            var sViewerItemMarkup = '';
-            var sTrackItemMarkup = '';
 
             if(sViewType && sViewType == 'image') {
 
                 //generate viewer item
-                sViewerItemMarkup = _buildImageItem(bCaptions, oItemData);
+                sViewerItems += _buildImageItem(bCaptions, oItemData);
 
-                //generate track item
-                //TO DO
-                //sTrackItemMarkup = _buildTrackImageItem(oItemData);
+                //generate thumbnail item
+                sThumbnailsItems += _buildImageThumbnail(oItemData);
             }
             if(sViewType && sViewType == 'video') {
 
-                //generate viewer item
+                //add video ID to collection
                 arrVideos.push(oItemData.videoID);
-                sViewerItemMarkup = _buildVideoItem(oItemData, arrVideos.length);
 
-                //generate track item
-                //TO DO
-                //sTrackItemMarkup = _buildTrackImageItem(oItemData);
+                //generate viewer item
+                sViewerItems += _buildVideoItem(oItemData, arrVideos.length);
+
+                //generate thumbnail item
+                sThumbnailsItems += _buildVideoThumbnail(oItemData);
             }
-
-            sViewerItemsPreRendered += sViewerItemMarkup;
-            sTrackItemsPreRendered += sViewerItemMarkup;
         }
 
-        var sGalleryTrack, 
-            sGalleryViewer =    '<div class="viewer">
-                                    <ul class="list-inline clearfix track">'+sItemsPreRendered+'</ul>'
-                                '</div>';
+        var sGalleryControls,
+            sGalleryThumbnails, 
+            sGalleryViewer =    '<div class="viewer"><ul class="list-inline clearfix track">'+sViewerItems+'</ul></div>';
 
         // determine how track will be built (if enabled)
         if(sThumbnails == 'always' || sThumbnails == 'desktop') {
             oTrackRenderingValues = _calculateRenderingValues(iGalleryLength, iThumbnailsClusterSize);
 
-            sGalleryTrack = '<div class="thumbnails">
-                                <div class="track">
-                                    <ul class="list-inline clearfix">'+sItemsPreRendered+'</ul>
-                                </div>
-                            </div>';
+            sGalleryThumbnails = '<div class="thumbnails items-'+oTrackRenderingValues.ItemsPerCluster.toString()+'"><div class="track"><ul class="list-inline clearfix">'+sThumbnailsItems+'</ul></div></div>';
+
+            console.log(sGalleryThumbnails);
         }
+
+        sGalleryControls = '<div class="controls"><button type="button" class="prev">prev</button><button type="button" class="next">next</button></div>';
+
+        sGallery = sGalleryViewer + sGalleryThumbnails + sGalleryControls;
+        //console.log(sGallery);
+
+        return sGallery;
 	};
 
 	var _calculateRenderingValues = function(q,v) {
@@ -108,11 +108,9 @@
     var _buildImageItem = function(bUseCaptions, oData) {
         var oItemData = oData;
         var sItemCaption = bUseCaptions ? '<figcaption>'+oItemData.caption+'</figcaption>' : '';
-        var sItemMarkup =  '<li>
-                                <figure class="gallery-item">
-                                    <img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'">'+sItemCaption+' />
-                                </figure>
-                            </li>';
+        var sItemMarkup =  '<li>'+
+                                '<figure class="gallery-item">'+ 
+                                    '<img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'"/>'+sItemCaption+'</figure></li>';
         return sItemMarkup;
     };
 
@@ -121,13 +119,30 @@
         var oItemData = oData;
         var sYTVideoID = oData.videoID;
         var iVideoNumber = iAmountOfVideos + 1;
-        var sItemMarkup =  '<li>
-                                <figure class="gallery-item">
-                                    <div id="video-'+iVideoNumber+'" data-ytid="'+sYTVideoID+'">
-                                        <div class="video-wrapper embed-responsive embed-responsive-16by9"></div>
-                                    </div>
-                                </figure>
-                            </li>';
+        var sItemMarkup =  '<li>'+
+                                '<figure class="gallery-item">'+
+                                    '<div id="video-'+iVideoNumber+'" data-ytid="'+sYTVideoID+'">'+
+                                        '<div class="video-wrapper embed-responsive embed-responsive-16by9"></div></div></figure></li>';
+        return sItemMarkup;
+    };
+
+    var _buildImageThumbnail = function (oData) {
+        var oItemData = oData;
+        var sItemMarkup =  '<li>' +
+                                '<figure class="thumbnail">' +
+                                    '<img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'" />' +
+                                '</figure></li>';
+        return sItemMarkup;
+    };
+
+    var _buildVideoThumbnail = function (oData) {
+        var oItemData = oData;
+        var sYTVideoID = oItemData.videoID;
+        var sYTVideoThumbnailURL = 'http://img.youtube.com/vi/'+sYTVideoID+'/default.jpg' || 'http://img.youtube.com/vi/'+sYTVideoID+'/3.jpg';
+        var sItemMarkup =  '<li>' +
+                                '<figure class="thumbnail">' +
+                                    '<img src="'+sYTVideoThumbnailURL+'" class="img-responsive" alt="'+oItemData.alt+'" />' +
+                                '</figure></li>';
         return sItemMarkup;
     };
 
