@@ -111,6 +111,11 @@
         var sItemMarkup =  '<li>'+
                                 '<figure class="gallery-item">'+ 
                                     '<img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'"/>'+sItemCaption+'</figure></li>';
+        sItemMarkup = '<li>'+
+                            '<figure class="gallery-item" style="background-image:url('+oItemData.imageUrl+')">'+
+                                '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:hidden"/>'+sItemCaption+
+                            '</figure>'+
+                        '</li>'
         return sItemMarkup;
     };
 

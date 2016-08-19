@@ -168,3 +168,9 @@ section {
 }
 
 .thumbnail {margin-bottom:0;}
+.thumbnail img {width:100%;}
+
+.viewer img {
+	background-position: center center;
+    background-size: cover;
+}

@@ -581,9 +581,9 @@ App.Plugins = (function(){
             var oGallery = document.getElementById('demoGallery');
             oGallery.innerHTML = sData;
 
-            //calculate images sizing
+            //calculate images sizing (dynamic sizing)
 
-            //init videos
+            //bind videos: a click to an image will trigger video initialization (on demand init)
 
             //gallery ready:  _OnGalleryReady();
 
