@@ -526,37 +526,67 @@ App.Plugins = (function(){
         var _play = function() {};
         var _togglePlayback = function() {};
         var _preload = function() {};
-        var _parseData = function(sStringifiedJSON) {
-            if(_webworkersSupported) {
-                var sParsedData, sData = sStringifiedJSON; console.log('sData: '); console.log(sData);
-                _wkDataParser.postMessage(sData); // Send data to our worker.
-                _wkDataParser.addEventListener('message', function(e) {
-                    sParsedData = e.data;  // console.log('e.data: '); console.log(e.data);
-                    return sParsedData;
-                }, false);
-            } else {
-                console.log('UPS! webworkers not supported');
-                // process all here... (fallback)
+
+        var bindYouTubeVideo = function () {
+            var sGallerySelector = '#carousel-' + oModalSettings.id;
+            var $videoWrappers = $(sGallerySelector).find('.video-wrapper');
+            window.videos = window.videos || [];
+            window.YT = window.YT || undefined;
+
+            if (window.YT == undefined) {
+                createYTObject();
             }
+
+            $videoWrappers.each(function (index, elem) {
+                var sID = 'video-' + index;
+                var sYTvideoID = $(this).attr("data-ytid");
+                var arrVideosLenght = window.videos.length;
+                var iArrayIndex = arrVideosLenght > 0 ? arrVideosLenght + index : index;
+
+                $(elem).attr('id', sID);
+
+                if (typeof window.YT.Player === 'function') {
+                    window.videos[iArrayIndex] = new YT.Player(sID, {
+                        height: '390',
+                        width: '640',
+                        videoId: sYTvideoID,
+                        events: {
+                            'onStateChange': function (event) {
+                                if (event.data == YT.PlayerState.ENDED)
+                                    event.target.stopVideo();
+                            }
+                        }
+                    });
+                }
+                else {
+                    console.log("YT object doesn't exist");
+                    return;
+                }
+            });
         };
-        var _preRenderItems = function(sStringifiedJSON) {
-            if(_webworkersSupported) {         
-                var sData = sStringifiedJSON;
-                _wkItemBuilder.postMessage(sData); // Send data to our worker.
-                _wkItemBuilder.addEventListener('message', function(e) {
-                    var sData = e.data;  // console.log('e.data: '); console.log(e.data);
-                    _renderItems(sData); //appending gallery to DOM
-                }, false);
-            } else {
-                console.log('UPS! webworkers not supported');
-                // process all here...
-            }
+        var createYTObject = function () {
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
         };
 
-        var _renderItems = function() {console.log('rendering gallery at DOM')};
         var _render = function(sStringifiedJSON) {
             var sData = sStringifiedJSON;
             //_wkPreRender.postMessage(sData); 
+
+            console.log('RECEIVED String');
+            console.log(sData);
+
+            var oGallery = document.getElementById('demoGallery');
+            oGallery.innerHTML = sData;
+
+            //calculate images sizing
+
+            //init videos
+
+            //gallery ready:  _OnGalleryReady();
+
         };
         var _preRender = function(sStringifiedJSON) {
             var sData = sStringifiedJSON; 
