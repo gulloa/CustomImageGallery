@@ -15,11 +15,15 @@
 
 	var _createGallery = function(data) {
 
+        var oData = data;
+
 		// cache data
+        /*
 		var arrItemsCollection = data.data,
 			iGalleryLength = arrItemsCollection.length; //console.log(data.thumbnails.visible + ' show thumbnails');
-
+        */
 		// cache all settings
+        /*
 		var bAutoplay = data.autoplay,
 			bCaptions = data.captions,
 			sId = data.id,
@@ -28,13 +32,88 @@
 			iAnimationHoldTime = data.animation.holdTime,
 			iAnimationTransitionTime = data.animation.holdTime,
 			bOptimizationEnabled = data.optimization.enable,
-			bOptimizationContrainRatio,
+			bOptimizationAspectRatio,
 			sOptimizationQueryString,
 			oTrackRenderingValues;
+            */
 
+        var sID = oData.id,
+            bAutoplay = oData.autoplay,
+            oAnimation = oData.animation,
+            bCaptions = oData.captions,
+            oControls = oData.controls,
+            sPlaceholderPath = oData.placeholderPath,
+            bSwipe = oData.swipe,
+            oThumbnails = oData.thumbnails,
+            oViewer = oData.viewer,
+            oGalleryItems = oData.data;
+        var iGalleryLength = oGalleryItems.length;
+        var arrVideos = new Array();
+        var sViewerItems = '';
+        var sThumbnailsItems = '';
+        var oTrackRenderingValues;
+
+        //process data
+        for(var i=0; i<iGalleryLength; i++) {
+            var oItemData = oGalleryItems[i];
+            var sViewType = oItemData.videoID != null ? 'video' : 'image';
+
+            if(sViewType && sViewType == 'image') {
+
+                //generate viewer item
+                var oViewerSettings = {
+                    viewer: oViewer,
+                    placeholderPath: sPlaceholderPath, 
+                    captions: bCaptions
+                };
+                sViewerItems += _buildImageItem(oItemData, oViewerSettings);
+
+                //generate thumbnail item
+                if(oThumbnails.visible == 'always' || oThumbnails.visible == 'desktop') {
+                    var oThumbnailsSettings = {
+                        thumbnails: oThumbnails,
+                        placeholderPath: sPlaceholderPath,
+                        queryString: oViewer.optimizationQueryString
+                    };
+                    sThumbnailsItems += _buildImageThumbnail(oItemData, oThumbnailsSettings);
+                }
+            }
+            if(sViewType && sViewType == 'video') {
+
+                //add video ID to collection
+                arrVideos.push(oItemData.videoID);
+
+                //generate viewer item
+                sViewerItems += _buildVideoItem(oItemData, arrVideos.length);
+
+                //generate thumbnail item
+                sThumbnailsItems += _buildVideoThumbnail(oItemData);
+            }
+        }
+
+        var sGalleryControls,
+            sGalleryThumbnails, 
+            sGalleryViewer =    '<div class="viewer"><ul class="list-inline clearfix track">'+sViewerItems+'</ul></div>';
+
+        var sThumbnails = oThumbnails.visible;
+        if(sThumbnails == 'always' || sThumbnails == 'desktop') {
+            var iThumbnailsClusterSize = oThumbnails.clusterSize;
+            oTrackRenderingValues = _calculateRenderingValues(iGalleryLength, iThumbnailsClusterSize);
+
+            sGalleryThumbnails = '<div class="thumbnails items-'+oTrackRenderingValues.ItemsPerCluster.toString()+'"><div class="track"><ul class="list-inline clearfix">'+sThumbnailsItems+'</ul></div></div>';
+
+            //console.log(sGalleryThumbnails);
+        }
+        sGalleryControls = '<div class="controls"><button type="button" class="prev">prev</button><button type="button" class="next">next</button></div>';
+
+        sGallery = sGalleryViewer + sGalleryThumbnails + sGalleryControls;
+
+        return sGallery;
+
+        /*
 		if(bOptimizationEnabled) {
-			bOptimizationContrainRatio = data.optimization.constrain;
-			sOptimizationQueryString = data.optimization.queryString;
+			bOptimizationAspectRatio = data.optimization.constrain || null;
+			sOptimizationQueryString = data.optimization.queryString || null;
 		}
 			
         var arrVideos = new Array();
@@ -46,6 +125,11 @@
             var sViewType = oItemData.videoID != null ? 'video' : 'image';
 
             if(sViewType && sViewType == 'image') {
+
+                var oSettings = {
+                    aspectRatio: bOptimizationAspectRatio,
+                    queryString: sOptimizationQueryString
+                }
 
                 //generate viewer item
                 sViewerItems += _buildImageItem(bCaptions, oItemData);
@@ -85,6 +169,9 @@
         //console.log(sGallery);
 
         return sGallery;
+        */
+
+
 	};
 
 	var _calculateRenderingValues = function(q,v) {
@@ -105,7 +192,8 @@
         }
     };
 
-    var _buildImageItem = function(bUseCaptions, oData) {
+    var _buildImageItem = function(oData, oSettings) {
+        /*
         var oItemData = oData;
         var sItemCaption = bUseCaptions ? '<figcaption>'+oItemData.caption+'</figcaption>' : '';
         var sItemMarkup =  '<li>'+
@@ -121,6 +209,36 @@
                                 '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+oItemData.imageUrl+')"/>'+sItemCaption+
                             '</figure>'+
                         '</li>'
+        */
+
+        var oItemData = oData;
+        var oOptions = oSettings;
+        var sAspectRatio = oOptions.viewer.aspectRatio,
+            sCaptions = oOptions.captions,
+            sPlaceholderImagePath = oOptions.placeholderPath,
+            sQueryString = oOptions.viewer.optimizationQueryString,
+            sImageURL = oItemData.imageUrl,
+            sImageAlt = oItemData.alt;
+            sItemMarkup = '';
+
+        var sItemCaption = sCaptions ? '<figcaption>'+oItemData.caption+'</figcaption>' : '';
+
+        if(sQueryString && sQueryString.length > 0) {
+            sImageURL += sQueryString;
+            sItemMarkup =   '<li>'+
+                                '<figure class="gallery-item">'+
+                                    '<img src="'+sImageURL+'" class="img-responsive" alt="'+sImageAlt+'" />'+sItemCaption+
+                                '</figure>'+
+                            '</li>';
+        } else {
+            var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatio + '.png'
+            sItemMarkup =   '<li>'+
+                                '<figure class="gallery-item">'+
+                                    '<img src="'+sPlaceholderImagePath+'" class="img-responsive optimize-aspect" alt="'+sImageAlt+'" style="background-image:url('+sImageURL+')"/>'+sItemCaption+
+                                '</figure>'+
+                            '</li>';
+        }
+
         return sItemMarkup;
     };
 
@@ -136,7 +254,8 @@
         return sItemMarkup;
     };
 
-    var _buildImageThumbnail = function (oData) {
+    var _buildImageThumbnail = function (oData, oSettings) {
+        /*
         var oItemData = oData;
         var sItemMarkup =  '<li>' +
                                 '<figure class="thumbnail">' +
@@ -149,6 +268,35 @@
                                     '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+oItemData.imageUrl+')" />' +
                                 '</figure></li>';
         return sItemMarkup;
+        */
+        var oItemData = oData;
+        var oOptions = oSettings;
+        var sAspectRatio = oOptions.thumbnails.aspectRatio,
+            sPlaceholderImagePath = oOptions.placeholderPath,
+            sQueryString = oOptions.queryString,
+            sImageURL = oItemData.imageUrl,
+            sImageAlt = oItemData.alt;
+            sItemMarkup = '';
+
+        //var sItemCaption = sCaptions ? '<figcaption>'+oItemData.caption+'</figcaption>' : '';
+
+        if(sQueryString && sQueryString.length > 0) {
+            sImageURL += sQueryString;
+            sItemMarkup =   '<li>'+
+                                '<figure class="thumbnail">'+
+                                    '<img src="'+sImageURL+'" class="img-responsive" alt="'+sImageAlt+'" />'+
+                                '</figure>'+
+                            '</li>';
+        } else {
+            var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatio + '.png'
+            sItemMarkup =   '<li>'+
+                                '<figure class="gallery-item">'+
+                                    '<img src="'+sPlaceholderImagePath+'" class="img-responsive optimize-aspect" alt="'+sImageAlt+'" style="background-image:url('+sImageURL+')"/>'+ //sItemCaption+
+                                '</figure>'+
+                            '</li>';
+        }
+
+        return sItemMarkup;        
     };
 
     var _buildVideoThumbnail = function (oData) {

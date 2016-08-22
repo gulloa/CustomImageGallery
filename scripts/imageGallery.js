@@ -602,6 +602,7 @@ App.Plugins = (function(){
             }
         };
         var _init = function(oSettings) {
+            /*
             _oSettings = {
                 data: null || oSettings.data, // array of objects
                 id: '01',
@@ -621,6 +622,36 @@ App.Plugins = (function(){
                     dynamic: true || oSettings.optimization.dynamic, // true | false
                     queryString: null || oSettings.optimization.queryString // '?queryStringParameters' || false
                 }
+            }
+            */
+
+            _oSettings = {
+                id: oSettings.id || 'gallery-'+Math.random(),
+                autoplay: oSettings.autoplay === undefined ? true : oSettings.autoplay, // boolean
+                animation: {
+                    holdTime: oSettings.animation.holdTime || 3000, // milliseconds
+                    transitionTime: oSettings.animation.transitionTime || 600 // milliseconds
+                },
+                captions: oSettings.captions === undefined ? false : oSettings.captions, // boolean
+                controls: {
+                    visible: oSettings.controls.visible === undefined ? true : oSettings.controls.visible, // boolean
+                    custom: {
+                        prev: oSettings.controls.custom.prev || 'default', // string | default
+                        next: oSettings.controls.custom.next || 'default' // string | default
+                    } || 'default' // object | false
+                },
+                placeholderPath: oSettings.placeholderPath || false, // string || false
+                swipe: oSettings.swipe === undefined ? true : oSettings.swipe, // boolean
+                thumbnails: {
+                    aspectRatio: oSettings.thumbnails.aspectRatio || '4:3', // 4:3 | 16:9 | 21:9
+                    clusterSize: oSettings.thumbnails.clusterSize || 5,
+                    visible: oSettings.thumbnails.visible || 'desktop' // 'always' | 'never' | 'desktop' 
+                },
+                viewer: {
+                    aspectRatio: oSettings.viewer.aspectRatio || '4:3', // 4:3 | 16:9 | 21:9 
+                    optimizationQueryString: oSettings.viewer.optimizationQueryString || false // '?queryStringParameters' || false
+                },
+                data: oSettings.data
             }
 
             console.log('init- settings');

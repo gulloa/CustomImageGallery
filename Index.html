@@ -158,6 +158,66 @@
                 }
                 */
             }
+
+            var oGallerySettings = {
+                id: '01',
+                autoplay: true,
+                animation: {
+                    holdTime: 3000, // milliseconds
+                    transitionTime: 600 // milliseconds
+                },
+                captions: true, // true | false
+                controls: {
+                    visible: true, // true | false
+                    custom: {
+                        prev: '', // string 
+                        next: ''  // string 
+                    } // object | false
+                },
+                placeholderPath: '/content/img/', // string
+                swipe: true, // true | false
+                thumbnails: {
+                    aspectRatio: '4:3', // 4:3 | 16:9 | 21:9
+                    clusterSize: 5,
+                    visible: 'always' // 'always' | 'never' | 'desktop' 
+                },
+                viewer: {
+                    aspectRatio: '4:3', // 4:3 | 16:9 | 21:9 
+                    optimizationQueryString: '?weight=800&height=300&crop&Constrain=true' // '?queryStringParameters' || false
+                },
+                data: [
+                    {
+                        alt: "Entrada a fraccionamiento", 
+                        caption: "La entrada a nuestro fraccionamiento está en la autopista a Mazatlán-Nogales", 
+                        imageUrl: "/content/img/001.jpg", 
+                        videoID: null //string
+                    },
+                    {
+                        alt: "Visita en familia", // string
+                        caption: "El entorno es ideal para toda la familia", 
+                        imageUrl: "/content/img/003.jpg", 
+                        videoID: null //string
+                    },
+                    {
+                        alt: "Vista al mar", // string
+                        caption: "La vista al mar es espectacular", 
+                        imageUrl: "/content/img/005.jpg", 
+                        videoID: null //string
+                    },
+                    {
+                        alt: "Gabriella Quevedo", // string
+                        caption: "(John Mayer) Why Georgia - Gabriella Quevedo", 
+                        imageUrl: null, 
+                        videoID: 'jGLqF2FIChM' //string
+                    },
+                    {
+                        alt: "Gabriella Quevedo", // string
+                        caption: "(U2) One - Gabriella Quevedo", 
+                        imageUrl: null, 
+                        videoID: 'GtLCt4xj9xs' //string
+                    }
+                ]
+            }
             demoGallery.Init(oGallerySettings);
         });
     </script>
