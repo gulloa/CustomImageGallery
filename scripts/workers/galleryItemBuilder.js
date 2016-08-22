@@ -38,9 +38,7 @@
             }
         }
     };
-    var _buildImageItem = function() {
-        
-    };
+    var _buildImageItem = function() {};
     var _buildVideoItem = function() {};
 
     var _createSlideItems = function() {};

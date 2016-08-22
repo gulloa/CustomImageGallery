@@ -597,6 +597,8 @@ App.Plugins = (function(){
                 // _wkDataParser = new Worker('/scripts/workers/dataProvider.js'); 
                 // _wkItemBuilder = new Worker('/scripts/workers/galleryItemBuilder.js');
                 _wkPreRender = new Worker('/scripts/workers/prerender.js');
+            } else {
+                console.log('Sorry, webworkers not suported on this browser')
             }
         };
         var _init = function(oSettings) {

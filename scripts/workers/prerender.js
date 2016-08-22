@@ -17,7 +17,7 @@
 
 		// cache data
 		var arrItemsCollection = data.data,
-			iGalleryLength = arrItemsCollection.length; console.log(data.thumbnails.visible + ' show thumbnails');
+			iGalleryLength = arrItemsCollection.length; //console.log(data.thumbnails.visible + ' show thumbnails');
 
 		// cache all settings
 		var bAutoplay = data.autoplay,
@@ -76,7 +76,7 @@
 
             sGalleryThumbnails = '<div class="thumbnails items-'+oTrackRenderingValues.ItemsPerCluster.toString()+'"><div class="track"><ul class="list-inline clearfix">'+sThumbnailsItems+'</ul></div></div>';
 
-            console.log(sGalleryThumbnails);
+            //console.log(sGalleryThumbnails);
         }
 
         sGalleryControls = '<div class="controls"><button type="button" class="prev">prev</button><button type="button" class="next">next</button></div>';
@@ -115,6 +115,11 @@
                             '<figure class="gallery-item" style="background-image:url('+oItemData.imageUrl+')">'+
                                 '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:hidden"/>'+sItemCaption+
                             '</figure>'+
+                        '</li>';
+        sItemMarkup = '<li>'+
+                            '<figure class="gallery-item">'+
+                                '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+oItemData.imageUrl+')"/>'+sItemCaption+
+                            '</figure>'+
                         '</li>'
         return sItemMarkup;
     };
@@ -137,6 +142,12 @@
                                 '<figure class="thumbnail">' +
                                     '<img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'" />' +
                                 '</figure></li>';
+
+        // if aspect ratio is 16-9
+        sItemMarkup =  '<li>' +
+                                '<figure class="thumbnail">' +
+                                    '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+oItemData.imageUrl+')" />' +
+                                '</figure></li>';
         return sItemMarkup;
     };
 
@@ -147,6 +158,12 @@
         var sItemMarkup =  '<li>' +
                                 '<figure class="thumbnail">' +
                                     '<img src="'+sYTVideoThumbnailURL+'" class="img-responsive" alt="'+oItemData.alt+'" />' +
+                                '</figure></li>';
+
+        // if aspect ratio is 16-9
+        sItemMarkup =  '<li>' +
+                                '<figure class="thumbnail">' +
+                                    '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+sYTVideoThumbnailURL+')" />' +
                                 '</figure></li>';
         return sItemMarkup;
     };

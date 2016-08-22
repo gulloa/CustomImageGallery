@@ -19,7 +19,7 @@
 	max-height: 56.3%;
 	width:100%;
 	max-width:100%;
-	border:10px solid red;
+	/*border:10px solid red;*/
 	padding:0;
 	margin:0;
 	-webkit-backface-visibility: hidden;
@@ -99,9 +99,23 @@
 	width:100%;
 	max-width:100%;
 	height:auto;
-	border:none;
+	border:3px solid royalblue;
 	outline:none;
+	background-position: center center;
+	background-repeat: no-repeat;
+    background-size: cover;
 }
+.image-gallery figcaption {
+	display: block;
+	padding:0 3px;
+	margin:6px 0;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: left;
+	text-transform: none;
+}
+
+
 .image-gallery .thumbnails {display:block; overflow:hidden;}
 .image-gallery .thumbnails .track {/*width:auto;*/}
 /*.image-gallery.items-1 .track {width:100%; max-width: 100%;}
@@ -126,6 +140,17 @@
 .image-gallery .thumbnails.items-8 li {width:1.25%; max-width: 1.25%;}
 .image-gallery .thumbnails.items-9 li {width:1.1111%; max-width: 1.1111%;}
 .image-gallery .thumbnails.items-10 li {width:1.0%; max-width: 1.0%;}
+
+.image-gallery .thumbnail {margin-bottom:0;}
+.image-gallery .thumbnail img {
+	width:100%;
+	max-width:100%;
+	height:auto;
+	padding:3px;
+	background-position: center center;
+	background-repeat: no-repeat;
+    background-size: cover;
+}
 
 /*.image-gallery .thumbnails .track {width:auto;}*/
 
@@ -165,12 +190,4 @@ section {
 .data-panel {
 	display:block;
 	margin:30px 0;
-}
-
-.thumbnail {margin-bottom:0;}
-.thumbnail img {width:100%;}
-
-.viewer img {
-	background-position: center center;
-    background-size: cover;
 }
