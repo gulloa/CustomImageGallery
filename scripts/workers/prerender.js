@@ -15,28 +15,10 @@
 
 	var _createGallery = function(data) {
 
+        // cache data
         var oData = data;
 
-		// cache data
-        /*
-		var arrItemsCollection = data.data,
-			iGalleryLength = arrItemsCollection.length; //console.log(data.thumbnails.visible + ' show thumbnails');
-        */
 		// cache all settings
-        /*
-		var bAutoplay = data.autoplay,
-			bCaptions = data.captions,
-			sId = data.id,
-			sThumbnails = data.thumbnails.visible != undefined ? data.thumbnails.visible : 'never', 
-			iThumbnailsClusterSize = data.thumbnails.cluster,
-			iAnimationHoldTime = data.animation.holdTime,
-			iAnimationTransitionTime = data.animation.holdTime,
-			bOptimizationEnabled = data.optimization.enable,
-			bOptimizationAspectRatio,
-			sOptimizationQueryString,
-			oTrackRenderingValues;
-            */
-
         var sID = oData.id,
             bAutoplay = oData.autoplay,
             oAnimation = oData.animation,
@@ -109,69 +91,6 @@
         sGallery = sGalleryViewer + sGalleryThumbnails + sGalleryControls;
 
         return sGallery;
-
-        /*
-		if(bOptimizationEnabled) {
-			bOptimizationAspectRatio = data.optimization.constrain || null;
-			sOptimizationQueryString = data.optimization.queryString || null;
-		}
-			
-        var arrVideos = new Array();
-        var sViewerItems = '';
-        var sThumbnailsItems = '';
-
-        for(var i=0; i<iGalleryLength; i++) {
-            var oItemData = arrItemsCollection[i];
-            var sViewType = oItemData.videoID != null ? 'video' : 'image';
-
-            if(sViewType && sViewType == 'image') {
-
-                var oSettings = {
-                    aspectRatio: bOptimizationAspectRatio,
-                    queryString: sOptimizationQueryString
-                }
-
-                //generate viewer item
-                sViewerItems += _buildImageItem(bCaptions, oItemData);
-
-                //generate thumbnail item
-                sThumbnailsItems += _buildImageThumbnail(oItemData);
-            }
-            if(sViewType && sViewType == 'video') {
-
-                //add video ID to collection
-                arrVideos.push(oItemData.videoID);
-
-                //generate viewer item
-                sViewerItems += _buildVideoItem(oItemData, arrVideos.length);
-
-                //generate thumbnail item
-                sThumbnailsItems += _buildVideoThumbnail(oItemData);
-            }
-        }
-
-        var sGalleryControls,
-            sGalleryThumbnails, 
-            sGalleryViewer =    '<div class="viewer"><ul class="list-inline clearfix track">'+sViewerItems+'</ul></div>';
-
-        // determine how track will be built (if enabled)
-        if(sThumbnails == 'always' || sThumbnails == 'desktop') {
-            oTrackRenderingValues = _calculateRenderingValues(iGalleryLength, iThumbnailsClusterSize);
-
-            sGalleryThumbnails = '<div class="thumbnails items-'+oTrackRenderingValues.ItemsPerCluster.toString()+'"><div class="track"><ul class="list-inline clearfix">'+sThumbnailsItems+'</ul></div></div>';
-
-            //console.log(sGalleryThumbnails);
-        }
-
-        sGalleryControls = '<div class="controls"><button type="button" class="prev">prev</button><button type="button" class="next">next</button></div>';
-
-        sGallery = sGalleryViewer + sGalleryThumbnails + sGalleryControls;
-        //console.log(sGallery);
-
-        return sGallery;
-        */
-
-
 	};
 
 	var _calculateRenderingValues = function(q,v) {
@@ -193,24 +112,6 @@
     };
 
     var _buildImageItem = function(oData, oSettings) {
-        /*
-        var oItemData = oData;
-        var sItemCaption = bUseCaptions ? '<figcaption>'+oItemData.caption+'</figcaption>' : '';
-        var sItemMarkup =  '<li>'+
-                                '<figure class="gallery-item">'+ 
-                                    '<img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'"/>'+sItemCaption+'</figure></li>';
-        sItemMarkup = '<li>'+
-                            '<figure class="gallery-item" style="background-image:url('+oItemData.imageUrl+')">'+
-                                '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:hidden"/>'+sItemCaption+
-                            '</figure>'+
-                        '</li>';
-        sItemMarkup = '<li>'+
-                            '<figure class="gallery-item">'+
-                                '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+oItemData.imageUrl+')"/>'+sItemCaption+
-                            '</figure>'+
-                        '</li>'
-        */
-
         var oItemData = oData;
         var oOptions = oSettings;
         var sAspectRatio = oOptions.viewer.aspectRatio,
@@ -255,20 +156,7 @@
     };
 
     var _buildImageThumbnail = function (oData, oSettings) {
-        /*
-        var oItemData = oData;
-        var sItemMarkup =  '<li>' +
-                                '<figure class="thumbnail">' +
-                                    '<img src="'+oItemData.imageUrl+'" class="img-responsive" alt="'+oItemData.alt+'" />' +
-                                '</figure></li>';
 
-        // if aspect ratio is 16-9
-        sItemMarkup =  '<li>' +
-                                '<figure class="thumbnail">' +
-                                    '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+oItemData.imageUrl+')" />' +
-                                '</figure></li>';
-        return sItemMarkup;
-        */
         var oItemData = oData;
         var oOptions = oSettings;
         var sAspectRatio = oOptions.thumbnails.aspectRatio,
@@ -277,8 +165,6 @@
             sImageURL = oItemData.imageUrl,
             sImageAlt = oItemData.alt;
             sItemMarkup = '';
-
-        //var sItemCaption = sCaptions ? '<figcaption>'+oItemData.caption+'</figcaption>' : '';
 
         if(sQueryString && sQueryString.length > 0) {
             sImageURL += sQueryString;
@@ -291,7 +177,7 @@
             var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatio + '.png'
             sItemMarkup =   '<li>'+
                                 '<figure class="gallery-item">'+
-                                    '<img src="'+sPlaceholderImagePath+'" class="img-responsive optimize-aspect" alt="'+sImageAlt+'" style="background-image:url('+sImageURL+')"/>'+ //sItemCaption+
+                                    '<img src="'+sPlaceholderImagePath+'" class="img-responsive optimize-aspect" alt="'+sImageAlt+'" style="background-image:url('+sImageURL+')"/>'+
                                 '</figure>'+
                             '</li>';
         }
