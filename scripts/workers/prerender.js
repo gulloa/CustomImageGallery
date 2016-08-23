@@ -8,7 +8,6 @@
 		var sMarkup = _createGallery(oSettings);
 
 		// post result
-		//-self.postMessage(JSON.stringify(sMarkup));
         self.postMessage(sMarkup);
 
 	}, false);
@@ -30,7 +29,6 @@
             bSwipe = oData.swipe,
             oThumbnails = oData.thumbnails,
             oViewer = oData.viewer;
-
 
         var arrVideos = new Array();
         var sViewerItems = '';
@@ -190,15 +188,6 @@
 
     var _buildVideoThumbnail = function (oData, oSettings) {
         var oItemData = oData;
-        var sYTVideoID = oItemData.videoID;
-        var sYTVideoThumbnailURL = 'http://img.youtube.com/vi/'+sYTVideoID+'/default.jpg' || 'http://img.youtube.com/vi/'+sYTVideoID+'/3.jpg';
-        /*
-        var sItemMarkup =  '<li>' +
-                                '<figure class="thumbnail">' +
-                                    '<img src="'+sYTVideoThumbnailURL+'" class="img-responsive" alt="'+oItemData.alt+'" />' +
-                                '</figure></li>';
-        */
-        // if aspect ratio is 16-9
         var oOptions = oSettings;
         var sAspectRatio = oOptions.thumbnails.aspectRatio,
             sAspectRatioFileString = _getAspectRatioFileString(sAspectRatio),
@@ -206,6 +195,8 @@
             sImageAlt = oItemData.alt,
             sItemMarkup = '';
         
+        var sYTVideoID = oItemData.videoID;
+        var sYTVideoThumbnailURL = 'http://img.youtube.com/vi/'+sYTVideoID+'/default.jpg' || 'http://img.youtube.com/vi/'+sYTVideoID+'/3.jpg';        
         var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatioFileString;
             sItemMarkup =   '<li>' +
                                 '<figure class="thumbnail">'+
