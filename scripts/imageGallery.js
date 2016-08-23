@@ -602,28 +602,6 @@ App.Plugins = (function(){
             }
         };
         var _init = function(oSettings) {
-            /*
-            _oSettings = {
-                data: null || oSettings.data, // array of objects
-                id: '01',
-                captions: true || oSettings.captions,  // true | false
-                autoplay: true || oSettings.autoplay,  // true | false
-                thumbnails: {
-                    visible: 'always' || oSettings.thumbnails.visible, // 'always' | 'never' | 'desktop'
-                    cluster: 5 || oSettings.thumbnails.cluster // 3 - 10
-                },
-                animation: {
-                    holdTime: 3000 || oSettings.animation.holdTime, // milliseconds
-                    transitionTime: 600 || oSettings.animation.transitionTime // milliseconds
-                },
-                optimization: {
-                    enable: true || oSettings.optimization.enable, // true | false
-                    constrain: true || oSettings.optimization.constrain, // true | falses
-                    dynamic: true || oSettings.optimization.dynamic, // true | false
-                    queryString: null || oSettings.optimization.queryString // '?queryStringParameters' || false
-                }
-            }
-            */
 
             _oSettings = {
                 id: oSettings.id || 'gallery-'+Math.random(),
