@@ -16,7 +16,9 @@
 	var _createGallery = function(data) {
 
         // cache data
-        var oData = data;
+        var oData = data,
+            oGalleryItems = oData.data,
+            iGalleryLength = oGalleryItems.length;
 
 		// cache all settings
         var sID = oData.id,
@@ -27,9 +29,9 @@
             sPlaceholderPath = oData.placeholderPath,
             bSwipe = oData.swipe,
             oThumbnails = oData.thumbnails,
-            oViewer = oData.viewer,
-            oGalleryItems = oData.data;
-        var iGalleryLength = oGalleryItems.length;
+            oViewer = oData.viewer;
+
+
         var arrVideos = new Array();
         var sViewerItems = '';
         var sThumbnailsItems = '';
@@ -69,7 +71,14 @@
                 sViewerItems += _buildVideoItem(oItemData, arrVideos.length);
 
                 //generate thumbnail item
-                sThumbnailsItems += _buildVideoThumbnail(oItemData);
+                if(oThumbnails.visible == 'always' || oThumbnails.visible == 'desktop') {
+                    var oThumbnailsSettings = {
+                            thumbnails: oThumbnails,
+                            placeholderPath: sPlaceholderPath,
+                            queryString: oViewer.optimizationQueryString
+                    };
+                    sThumbnailsItems += _buildVideoThumbnail(oItemData, oThumbnailsSettings);
+                }
             }
         }
 
@@ -78,6 +87,7 @@
             sGalleryViewer =    '<div class="viewer"><ul class="list-inline clearfix track">'+sViewerItems+'</ul></div>';
 
         var sThumbnails = oThumbnails.visible;
+
         if(sThumbnails == 'always' || sThumbnails == 'desktop') {
             var iThumbnailsClusterSize = oThumbnails.clusterSize;
             oTrackRenderingValues = _calculateRenderingValues(iGalleryLength, iThumbnailsClusterSize);
@@ -115,6 +125,7 @@
         var oItemData = oData;
         var oOptions = oSettings;
         var sAspectRatio = oOptions.viewer.aspectRatio,
+            sAspectRatioFileString = _getAspectRatioFileString(sAspectRatio),
             sCaptions = oOptions.captions,
             sPlaceholderImagePath = oOptions.placeholderPath,
             sQueryString = oOptions.viewer.optimizationQueryString,
@@ -132,7 +143,7 @@
                                 '</figure>'+
                             '</li>';
         } else {
-            var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatio + '.png'
+            var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatioFileString;
             sItemMarkup =   '<li>'+
                                 '<figure class="gallery-item">'+
                                     '<img src="'+sPlaceholderImagePath+'" class="img-responsive optimize-aspect" alt="'+sImageAlt+'" style="background-image:url('+sImageURL+')"/>'+sItemCaption+
@@ -160,46 +171,70 @@
         var oItemData = oData;
         var oOptions = oSettings;
         var sAspectRatio = oOptions.thumbnails.aspectRatio,
+            sAspectRatioFileString = _getAspectRatioFileString(sAspectRatio),
             sPlaceholderImagePath = oOptions.placeholderPath,
             sQueryString = oOptions.queryString,
             sImageURL = oItemData.imageUrl,
-            sImageAlt = oItemData.alt;
+            sImageAlt = oItemData.alt,
             sItemMarkup = '';
 
-        if(sQueryString && sQueryString.length > 0) {
-            sImageURL += sQueryString;
+        var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatioFileString;
             sItemMarkup =   '<li>'+
                                 '<figure class="thumbnail">'+
-                                    '<img src="'+sImageURL+'" class="img-responsive" alt="'+sImageAlt+'" />'+
+                                    '<img src="'+sPlaceholderImagePath+'" class="img-responsive optimize-aspect" alt="'+sImageAlt+'" style="visibility:visible; background-image:url('+sImageURL+')"/>'+
                                 '</figure>'+
                             '</li>';
-        } else {
-            var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatio + '.png'
-            sItemMarkup =   '<li>'+
-                                '<figure class="gallery-item">'+
-                                    '<img src="'+sPlaceholderImagePath+'" class="img-responsive optimize-aspect" alt="'+sImageAlt+'" style="background-image:url('+sImageURL+')"/>'+
-                                '</figure>'+
-                            '</li>';
-        }
 
         return sItemMarkup;        
     };
 
-    var _buildVideoThumbnail = function (oData) {
+    var _buildVideoThumbnail = function (oData, oSettings) {
         var oItemData = oData;
         var sYTVideoID = oItemData.videoID;
         var sYTVideoThumbnailURL = 'http://img.youtube.com/vi/'+sYTVideoID+'/default.jpg' || 'http://img.youtube.com/vi/'+sYTVideoID+'/3.jpg';
+        /*
         var sItemMarkup =  '<li>' +
                                 '<figure class="thumbnail">' +
                                     '<img src="'+sYTVideoThumbnailURL+'" class="img-responsive" alt="'+oItemData.alt+'" />' +
                                 '</figure></li>';
-
+        */
         // if aspect ratio is 16-9
-        sItemMarkup =  '<li>' +
-                                '<figure class="thumbnail">' +
-                                    '<img src="content/img/img16-9.png" class="img-responsive" alt="'+oItemData.alt+'" style="visibility:visible; background-image:url('+sYTVideoThumbnailURL+')" />' +
-                                '</figure></li>';
+        var oOptions = oSettings;
+        var sAspectRatio = oOptions.thumbnails.aspectRatio,
+            sAspectRatioFileString = _getAspectRatioFileString(sAspectRatio),
+            sPlaceholderImagePath = oOptions.placeholderPath,
+            sImageAlt = oItemData.alt,
+            sItemMarkup = '';
+        
+        var sPlaceholderImagePath = sPlaceholderImagePath + sAspectRatioFileString;
+            sItemMarkup =   '<li>' +
+                                '<figure class="thumbnail">'+
+                                    '<img src="'+sPlaceholderImagePath+'" class="img-responsive" alt="'+sImageAlt+'" style="background-image:url('+sYTVideoThumbnailURL+')" />'+
+                                '</figure>'+
+                            '</li>';
+
         return sItemMarkup;
+    };
+
+    var _getAspectRatioFileString = function(sAspectRatio) {
+        var sFileName;
+
+        switch(sAspectRatio) {
+            case '21:9':
+                sFileName = 'img21-9.png';
+                break;
+            case '16:9':
+                sFileName = 'img16-9.png';
+                break;
+            case '4:3':
+                sFileName = 'img4-3.png';
+                break;
+            default:
+                sFileName = 'img16-9.png';
+                break;
+        }
+
+        return sFileName;
     };
 
 })(this);
