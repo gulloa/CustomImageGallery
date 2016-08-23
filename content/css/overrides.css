@@ -178,6 +178,7 @@
 	padding:12px;
 	margin:0 6px 0 0;
 }
+.controls button + button {margin-left:9px;}
 .controls a:active {color:red;}
 
 /* section */
