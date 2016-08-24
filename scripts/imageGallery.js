@@ -1073,7 +1073,7 @@ App.Plugins = (function(){
                             oThis.classList.add('gallery-ready');
 
                             //init swipe binding
-                            _oSwipeGallery = App.Plugins.SwipeGallery();
+                            _oSwipeGallery = new App.Plugins.SwipeGallery();
                             _oSwipeGallery.Init(_sGalleryID);
 
                             //bind controls and swipe events

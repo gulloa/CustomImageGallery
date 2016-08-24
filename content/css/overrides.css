@@ -117,7 +117,7 @@
 }
 
 
-.image-gallery .thumbnails {display:block; overflow:hidden;}
+.image-gallery .thumbnails {display:block; overflow:hidden;     margin-top: 15px;}
 .image-gallery .thumbnails .track {/*width:auto;*/}
 /*.image-gallery.items-1 .track {width:100%; max-width: 100%;}
 .image-gallery.items-2 .track {width:200%; max-width: 200%;}
