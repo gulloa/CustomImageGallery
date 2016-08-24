@@ -8,7 +8,7 @@ App.Plugins = (function(){
         var _wkDataParser, _wkItemBuilder, _wkPreRender;
         var _oSwipeGallery;
 
-        var _iCurrentSlideIndex = 0, _sTargetID, _iThumbsClusterSize, _iCurrentCluster = 0;
+        var _iCurrentSlideIndex = 0, _sGalleryID, _iThumbsClusterSize, _iCurrentCluster = 0;
 
         //helper functions
         var _getIEVersion = function() {
@@ -106,7 +106,7 @@ App.Plugins = (function(){
         var _goToSlide = function(iTargetIndex) {
             console.log('iTargetIndex: '+iTargetIndex);
 
-            var sJQSelector = '#'+_sTargetID;
+            var sJQSelector = '#'+_sGalleryID;
             var jqoTrack= $('.viewer .track', sJQSelector);
             var jqoListItems = $('.viewer ul li', sJQSelector);
             var itemWidth = Math.abs(jqoListItems.width()); 
@@ -183,7 +183,7 @@ App.Plugins = (function(){
             if(e && e.stopPropagation)
                 e.stopPropagation();
 
-            var sJQSelector = '#'+_sTargetID;
+            var sJQSelector = '#'+_sGalleryID;
             var jqoGalleryItems = $('.viewer .gallery-item', sJQSelector);
             var iGallerySize = jqoGalleryItems.length;
             var iNextIndex = direction == "next" ? parseInt(_iCurrentSlideIndex) + 1 : parseInt(_iCurrentSlideIndex) - 1;   console.log('from button iNextIndex: '+iNextIndex);
@@ -226,7 +226,7 @@ App.Plugins = (function(){
             // Define that the event name is 'build'.
             customEvent.initEvent('onSlide', true, true);
 
-            var elem = document.getElementById(_sTargetID);
+            var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent);
         };        
         var _swipeTrackImages = function(e, direction) {
@@ -239,7 +239,7 @@ App.Plugins = (function(){
             if(e && e.stopPropagation)
                 e.stopPropagation();
 
-            var sJQSelector = '#'+_sTargetID;
+            var sJQSelector = '#'+_sGalleryID;
             var jqoGalleryItems = $('.thumbnails .thumbnail', sJQSelector);
             var iGallerySize = jqoGalleryItems.length;
             var iNextIndex = direction == "next" ? parseInt(_iCurrentSlideIndex) : parseInt(_iCurrentSlideIndex);   console.log('from button iNextIndex: '+iNextIndex);
@@ -282,7 +282,7 @@ App.Plugins = (function(){
             // Define that the event name is 'build'.
             customEvent.initEvent('onSlide', true, true);
 
-            var elem = document.getElementById(_sTargetID);
+            var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent);
 
             console.log('---------------------------');
@@ -310,25 +310,23 @@ App.Plugins = (function(){
                     break;
             }
         };
-        var _bindSwipe = function (sTarget) {
-            if(!sTarget) {
-                return;
-            }
-
+        var _bindSwipe = function (oSettings) {
             _extendJQueryEasing();
+            var oInteractionSettings = oSettings;
+            var sGallerySelector = '#'+_sGalleryID;
 
-            _sTargetID = sTarget;
-            var sGallerySelector = '#'+_sTargetID;
+            _iThumbsClusterSize = oInteractionSettings.thumbnails.clusterSize;
 
-            _iThumbsClusterSize = 5; //-hardcoded
+            document.getElementById(_sGalleryID).querySelector('.controls .next').addEventListener('click', _next);
+            document.getElementById(_sGalleryID).querySelector('.controls .prev').addEventListener('click', _previous);
 
-            $('.controls .next', sGallerySelector).bind('click', _next);
-            $('.controls .prev', sGallerySelector).bind('click', _previous);
+            // $('.controls .next', sGallerySelector).bind('click', _next);
+            // $('.controls .prev', sGallerySelector).bind('click', _previous);
 
             $('#csstransitions label').text(Modernizr.csstransitions);
             $('#csstransforms label').text(Modernizr.csstransforms);
 
-            var $tumbnails = $(sGallerySelector).find('.thumbnail');
+            /*var $tumbnails = $(sGallerySelector).find('.thumbnail');
             $.each($tumbnails, function(key, value){
                 console.log( key + ": " + value );
                 var oItem = value;
@@ -337,7 +335,19 @@ App.Plugins = (function(){
                     var iTarget = this.getAttribute('data-id');
                     _goToSlide(iTarget);
                 });
-            });
+            });*/
+
+            var arrThumbnails = document.getElementById(_sGalleryID).querySelectorAll('.thumbnail');
+            var iThumbsLength = arrThumbnails.length;
+            for(var i = 0; i<iThumbsLength; i++){
+                var oItem = arrThumbnails[i];
+                console.log( i + ": " + oItem);
+                oItem.setAttribute('data-id', i);
+                oItem.addEventListener('click', function(e){
+                    var iTarget = this.getAttribute('data-id');
+                    _goToSlide(iTarget);
+                });
+            }
 
             var swipeOptions = {
                 triggerOnTouchEnd: false,
@@ -346,8 +356,9 @@ App.Plugins = (function(){
                 threshold: 90
             };
 
-            var jqoImgs = $(sGallerySelector+" .viewer");
-            jqoImgs.swipe(swipeOptions);
+            //var jqoImgs = $(sGallerySelector+" .viewer");
+            var oViewer = document.getElementById(_sGalleryID).querySelector('.viewer');
+            $(oViewer).swipe(swipeOptions);
 
             console.log("view initialized");
             _OnSwipeReady();
@@ -570,7 +581,14 @@ App.Plugins = (function(){
                             // _oSwipeGallery = new App.Plugins.SwipeGallery();
                             // _oSwipeGallery.Init(_sGalleryID);
 
-                            _bindSwipe(_sGalleryID);
+                            var slideSettings = {
+                                autoplay: _oSettings.autoplay,
+                                animation: _oSettings.animation,
+                                controls: _oSettings.controls,
+                                swipe: _oSettings.swipe,
+                                thumbnails: _oSettings.thumbnails
+                            };
+                            _bindSwipe(slideSettings);
 
                             //bind controls and swipe events
 
@@ -666,7 +684,7 @@ App.Plugins = (function(){
             // Define that the event name is 'build'.
             customEvent.initEvent('OnSwipeReady', true, true);
 
-            var elem = document.getElementById(_sTargetID);
+            var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent); 
         };
 
