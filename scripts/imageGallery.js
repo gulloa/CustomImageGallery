@@ -329,7 +329,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
         // var sNodeValue = oNode.firstChild.nodeValue;
         // console.log("Node value: "+sNodeValue);
 
-
+        /*
         var arrImagesURLs = arrImagesURLs || new Array();
         if (arrImagesURLs.length == 0) {
             arrImagesURLs.push('001.jpg');
@@ -343,7 +343,7 @@ App.Plugins.ImageGallery = (function ($, undefined) {
             arrImagesURLs.push('009.jpg');
         }
         _initImages(arrImagesURLs);
-
+        */
 
         var swipeOptions = {
             triggerOnTouchEnd: false,
@@ -513,6 +513,392 @@ App.Plugins.CustomImageGallery = (function(){
 
 App.Plugins = (function(){
 
+    var SwipeImageGallery = function(){
+        var _iCurrentSlideIndex = 0;
+
+        var _extendJQueryEasing = function () {
+            jQuery.extend(jQuery.easing, {
+                easeInQuad: function (x, t, b, c, d) {
+                    return c * (t /= d) * t + b;
+                },
+                easeOutQuad: function (x, t, b, c, d) {
+                    return -c * (t /= d) * (t - 2) + b;
+                },
+                easeInOutQuad: function (x, t, b, c, d) {
+                    if ((t /= d / 2) < 1) return c / 2 * t * t + b;
+                    return -c / 2 * ((--t) * (t - 2) - 1) + b;
+                },
+                easeInCubic: function (x, t, b, c, d) {
+                    return c * (t /= d) * t * t + b;
+                },
+                easeOutCubic: function (x, t, b, c, d) {
+                    return c * ((t = t / d - 1) * t * t + 1) + b;
+                },
+                easeInOutCubic: function (x, t, b, c, d) {
+                    if ((t /= d / 2) < 1) return c / 2 * t * t * t + b;
+                    return c / 2 * ((t -= 2) * t * t + 2) + b;
+                },
+                easeInQuart: function (x, t, b, c, d) {
+                    return c * (t /= d) * t * t * t + b;
+                },
+                easeOutQuart: function (x, t, b, c, d) {
+                    return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+                },
+                easeInOutQuart: function (x, t, b, c, d) {
+                    if ((t /= d / 2) < 1) return c / 2 * t * t * t * t + b;
+                    return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+                },
+                easeInQuint: function (x, t, b, c, d) {
+                    return c * (t /= d) * t * t * t * t + b;
+                },
+                easeOutQuint: function (x, t, b, c, d) {
+                    return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+                },
+                easeInOutQuint: function (x, t, b, c, d) {
+                    if ((t /= d / 2) < 1) return c / 2 * t * t * t * t * t + b;
+                    return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+                },
+                easeInSine: function (x, t, b, c, d) {
+                    return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
+                },
+                easeOutSine: function (x, t, b, c, d) {
+                    return c * Math.sin(t / d * (Math.PI / 2)) + b;
+                },
+                easeInOutSine: function (x, t, b, c, d) {
+                    return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
+                },
+                easeInExpo: function (x, t, b, c, d) {
+                    return (t == 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
+                },
+                easeOutExpo: function (x, t, b, c, d) {
+                    return (t == d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
+                },
+                easeInOutExpo: function (x, t, b, c, d) {
+                    if (t == 0) return b;
+                    if (t == d) return b + c;
+                    if ((t /= d / 2) < 1) return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
+                    return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
+                }
+            });
+        };
+
+        var _getIEVersion = function() {
+            var sIE11Token = "rv:11.0";
+            var sIE10Token = "MSIE 10.0";
+            var sUserAgentString = navigator.userAgent;
+            var bIsIE11 = sUserAgentString.indexOf(sIE11Token) > -1;
+            var bIsIE10 = sUserAgentString.indexOf(sIE10Token) > -1;
+
+            if(bIsIE11) {
+                return "11"
+            }
+            else if(bIsIE10) {
+                return "10"
+            }
+            else {
+                return false;
+            }
+        }
+
+        var _getItemWidth = function() {
+            var jqoItems = $("#demoGallery .viewer li"); 
+            //var iItemWidth = Math.round(jqoItems.width().valueOf());
+            var iItemWidth = Math.abs(jqoItems.width()); console.log('iItemWidth: '+iItemWidth);
+            return iItemWidth;
+        };
+
+        var _getItemsLength = function() {
+            var jqoItems = $("#demoGallery .viewer li"); 
+            var iItemsLength = jqoItems.length;
+            return iItemsLength;
+        };
+
+        var _setAnimationProperties = function(jqo, duration, position, usePercentage) {
+            console.log('Inside of setAnimationProperties');
+            var sCSSTransitionDuration, sCSSTransform, sCSSValue, bIsIE, jqoTrack, iDuration, sPosition, bUsePercentage;
+            _nTranslateX = position; console.log('translateX set to: '+_nTranslateX);
+
+            iDuration = duration;
+            sPosition = !usePercentage ? position.toString() + 'px' : position.toString() + '%';
+            jqoTrack = jqo;
+            bIsIE = _getIEVersion();
+            bUsePercentage = usePercentage ? usePercentage : false;
+            sCSSTransitionDuration =    '-webkit-transition-duration: ' + iDuration + 's;' + 
+                                            '-moz-transition-duration: ' + iDuration + 's;' + 
+                                            'transition-duration: ' + iDuration + 's;'; 
+            sCSSTransform =     '-webkit-transform: translate(' + sPosition + ',0);' + 
+                                    '-moz-transform: translate(' + sPosition + ',0);' + 
+                                    'transform: translate(' + sPosition + ',0);'; 
+            sCSSValue = sCSSTransitionDuration + sCSSTransform;
+
+            
+            if(bIsIE == false) {
+                jqoTrack.attr('style', sCSSValue);
+            } else {
+                sCSSTransitionDuration =    '-ms-transition-duration: ' + iDuration + 's;' + 
+                                                'transition-duration: ' + iDuration + 's;';
+                sCSSTransform =     '-ms-transform: translate(' + sPosition + ',0);' + 
+                                        'transform: translate(' + sPosition + ',0);';
+                sCSSValue = sCSSTransitionDuration + sCSSTransform;
+                jqoTrack.attr('style', sCSSValue);
+            }
+        }
+
+        var _swipeImages = function(e, direction) {
+            if(e && e.preventDefault)
+                e.preventDefault();
+
+            if(e && e.stopPropagation)
+                e.stopPropagation();
+
+            var jqoGalleryItems = $('.viewer .gallery-item', '#demoGallery');
+            var iGallerySize = jqoGalleryItems.length;
+            var iNextIndex = direction == "next" ? _iCurrentSlideIndex + 1 : _iCurrentSlideIndex - 1;
+            var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  //-console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
+
+            if (bCanSwipeNextIndex) {
+                var jqoListItems = $('.viewer ul li', '#demoGallery');
+                var itemWidth = Math.abs(jqoListItems.width()); 
+                var jqoTrack= $('.viewer .track', '#demoGallery');
+                var iTrackWidth = Math.abs(jqoTrack.width()); 
+                var isIE = _getIEVersion();
+                var bCSSTransitions = Modernizr.csstransitions;
+                var bCSSTransforms = Modernizr.csstransforms;
+                var bCSSAnimation = bCSSTransitions && bCSSTransforms; console.log('bCSSAnimation: '+bCSSAnimation);
+
+                if(bCSSAnimation) {
+                    _iCurrentSlideIndex = iNextIndex;
+                    var iValue = (_iCurrentSlideIndex * itemWidth);
+                    var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
+                    var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
+                    var nDuration = 0.6;
+
+                    if(!isIE) {
+                        //jqoTrack.attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
+                        _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                    } else {
+                        //jqoTrack.attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
+                        //_setAnimationProperties(jqoTrack, iDuration, distance);
+                        _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                    }
+                } 
+                else {
+                    var iValue = (_iCurrentSlideIndex * 100);
+                    var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
+                    jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
+                }
+            }
+
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('onSlide', true, true);
+
+            var elem = document.getElementById('demoGallery');
+            elem.dispatchEvent(customEvent);
+        };
+
+        var _nextSlide = function(event) {
+            _swipeImages(event, "next");
+        }
+
+        var _prevSlide = function(event) {
+            _swipeImages(event, "prev");
+        }
+
+        var _swipeCallback = function(event, phase, direction, distance) {
+            var sPhase = phase; 
+
+            switch(sPhase) {
+                case "end":
+                    console.log('end');
+
+                    var sDirection = direction;
+                    if(sDirection == "left") {
+                        _swipeImages(event, "next");
+                    }
+                    else if(sDirection == "right") {
+                        _swipeImages(event, "prev");
+                    }
+                    break;
+                case "move":
+                case "cancel":
+                default:
+                    break;
+            }
+        };
+
+        var _swipeTrackCallback = function(event, phase, direction, distance) {
+            var sPhase = phase; 
+
+            switch(sPhase) {
+                case "end":
+                    console.log('end');
+
+                    var sDirection = direction;
+                    if(sDirection == "left") {
+                        _swipeImages(event, "next");
+                    }
+                    else if(sDirection == "right") {
+                        _swipeImages(event, "prev");
+                    }
+                    break;
+                case "move":
+                case "cancel":
+                default:
+                    break;
+            }
+        };
+
+        var _swipeTrackImages = function(e, direction) {
+            if(e && e.preventDefault)
+                e.preventDefault();
+
+            if(e && e.stopPropagation)
+                e.stopPropagation();
+
+            var jqoGalleryItems = $('.viewer .thumbnail', '#demoGallery');
+            var iGallerySize = jqoGalleryItems.length;
+            var iNextIndex = direction == "next" ? _iCurrentSlideIndex + 1 : _iCurrentSlideIndex - 1;
+            var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  //-console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
+
+            if (bCanSwipeNextIndex) {
+                var jqoListItems = $('.thumbnails ul li', '#demoGallery');
+                var itemWidth = Math.abs(jqoListItems.width()); 
+                var jqoTrack= $('.viewer .track', '#demoGallery');
+                var iTrackWidth = Math.abs(jqoTrack.width()); 
+                var isIE = _getIEVersion();
+                var bCSSTransitions = Modernizr.csstransitions;
+                var bCSSTransforms = Modernizr.csstransforms;
+                var bCSSAnimation = bCSSTransitions && bCSSTransforms; console.log('bCSSAnimation: '+bCSSAnimation);
+
+                if(bCSSAnimation) {
+                    _iCurrentSlideIndex = iNextIndex;
+                    var iValue = (_iCurrentSlideIndex * itemWidth);
+                    var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
+                    var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
+                    var nDuration = 0.6;
+
+                    if(!isIE) {
+                        //jqoTrack.attr('style', '-webkit-transform: ' + 'translate('+sPosition+',0)');
+                        _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                    } else {
+                        //jqoTrack.attr('style', '-ms-transform: ' + 'translate('+sPosition+',0)');
+                        //_setAnimationProperties(jqoTrack, iDuration, distance);
+                        _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                    }
+                } 
+                else {
+                    var iValue = (_iCurrentSlideIndex * 100);
+                    var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
+                    jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
+                }
+            }
+        };
+
+        var _parseArrayToString = function(array) {
+
+        };
+
+        var _initImages = function(arrData) {
+            var arrImages = arrData;
+            var sImages = arrImages.toString();
+
+            if (typeof(Worker) !== "undefined") {
+                var wkItemBuilder = new Worker('/scripts/workers/galleryItemBuilder.js');
+                var obj = null;
+                
+                wkItemBuilder.addEventListener('message', function(e) {
+                  console.log(e.data);
+                }, false);
+
+                wkItemBuilder.postMessage(sImages); // Send data to our worker.
+            } else {
+                // Sorry! No Web Worker support..
+            }
+        }
+
+        var _init = function (arrImagesURLs) {
+            _extendJQueryEasing();
+
+            $('.controls .next', '#demoGallery').bind('click', _nextSlide);
+            $('.controls .prev', '#demoGallery').bind('click', _prevSlide);
+
+            $('#csstransitions label').text(Modernizr.csstransitions);
+            $('#csstransforms label').text(Modernizr.csstransforms);
+
+            // var oNode = document.getElementById('csstransitions'); 
+            // var sNodeText = oNode.textContent; 
+            // var oChildNode = oNode.querySelector('label');
+            // var sChildNodeText = oChildNode.textContent;
+            // console.log("sNodeText: "+sNodeText);
+            // console.log("sChildNodeText: "+sChildNodeText);
+            // oNode.textContent = "Supports css transitions?: ";
+            // oNode.appendChild(oChildNode);
+
+            // var sNodeValue = oNode.firstChild.nodeValue;
+            // console.log("Node value: "+sNodeValue);
+
+            /*
+            var arrImagesURLs = arrImagesURLs || new Array();
+            if (arrImagesURLs.length == 0) {
+                arrImagesURLs.push('001.jpg');
+                arrImagesURLs.push('002.jpg');
+                arrImagesURLs.push('003.jpg');
+                arrImagesURLs.push('004.jpg');
+                arrImagesURLs.push('005.jpg');
+                arrImagesURLs.push('006.jpg');
+                arrImagesURLs.push('007.jpg');
+                arrImagesURLs.push('008.jpg');
+                arrImagesURLs.push('009.jpg');
+            }
+            _initImages(arrImagesURLs);
+            */
+
+            var swipeOptions = {
+                triggerOnTouchEnd: false,
+                swipeStatus: _swipeCallback, //_swipeStatus,
+                allowPageScroll: "vertical",
+                threshold: 90
+            };
+
+            var jqoImgs = $("#demoGallery .viewer");
+            jqoImgs.swipe(swipeOptions);
+
+            var jqoThumbnails = $("#demoGallery .thumbnails");
+            jqoImgs.swipe(swipeOptions);
+
+            console.log("view initialized");
+
+            // var evObj = document.createEvent('HTMLEvents');
+            // document.body.addEventListener('OnGalleryReady', function(e){ alert(e === evObj); },true);
+            // evObj.initEvent('OnGalleryReady', true, true);
+
+            // Create the event.
+            // var event = document.createEvent('Event');
+
+            // Define that the event name is 'build'.
+            // event.initEvent('onSlide', true, true);
+
+            // Listen for the event.
+            var elem = document.getElementById('demoGallery');
+            elem.addEventListener('onSlide', function (e) {
+              // e.target matches elem
+              var evt  = e;
+              console.log(e);
+            }, false);
+
+            // target can be any Element or other EventTarget.
+            //elem.dispatchEvent(event);
+
+        };
+
+        return {
+            Init: _init
+        }
+    }
+
     var CustomImageGallery = function(){
 
         var _oSettings, _sGalleryID, _arrVideosReady, _arrVideos, _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
@@ -573,16 +959,16 @@ App.Plugins = (function(){
                             },
                             'onReady': function (event) {
                                 _arrVideosReady.push(sYTvideoID);
-                                console.log('event: '); console.log(event);
-                                console.log('Event fired: YT onReady');
-                                console.log('_arrVideosReady.length: '+_arrVideosReady.length);
-                                console.log('_arrVideos.length: '+_arrVideos.length);
+                                // console.log('event: '); console.log(event);
+                                // console.log('Event fired: YT onReady');
+                                // console.log('_arrVideosReady.length: '+_arrVideosReady.length);
+                                // console.log('_arrVideos.length: '+_arrVideos.length);
 
                                 if(_arrVideosReady.length == _arrVideos.length) {
-                                    //_OnGalleryReady();
-                                    var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
-                                    oPreloader.setAttribute('class', 'layer-load loading-gallery hidden');
-                                    console.log('preloader removed');
+                                    _OnGalleryReady();
+                                    // var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
+                                    // oPreloader.setAttribute('class', 'layer-load loading-gallery hidden');
+                                    // console.log('preloader removed');
                                 }
                             }
                         }
@@ -689,11 +1075,22 @@ App.Plugins = (function(){
 
 
                         //gallery ready:  _OnGalleryReady();
-                        // var oGallery = document.getElementById(_sGalleryID);
-                        // oGallery.addEventListener('OnGalleryReady', function() {
-                        //     var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
-                        //     oPreloader.setAttribute('class', 'layer-load loading-gallery-off hidden');
-                        // });
+                        var oGallery = document.getElementById(_sGalleryID);
+                        oGallery.addEventListener('OnGalleryReady', function() {
+                            var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
+                            oPreloader.setAttribute('class', 'layer-load loading-gallery-off hidden');
+
+                            //init swipe binding
+                            /*
+                            var swipeOptions = {
+                                triggerOnTouchEnd: false,
+                                swipeStatus: _swipeCallback, //_swipeStatus,
+                                allowPageScroll: "vertical",
+                                threshold: 90
+                            };
+                            */
+
+                        });
 
                     }, false);
 
@@ -784,6 +1181,7 @@ App.Plugins = (function(){
     }
 
     return {
+        SwipeGallery: SwipeImageGallery,
         CustomImageGallery: CustomImageGallery
     }
 

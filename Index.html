@@ -98,6 +98,7 @@
 
             var Plugins = App.Plugins;
             var demoGallery = new Plugins.CustomImageGallery();
+            var SwipeGallery;
 
             var oGallerySettings = {
                 id: 'demoGallery',
@@ -171,6 +172,11 @@
                 ]
             }
             demoGallery.Init(oGallerySettings);
+            
+            document.getElementById('demoGallery').addEventListener('OnGalleryReady', function() {
+                SwipeGallery = new Plugins.SwipeGallery();
+                SwipeGallery.Init('');
+            });
         });
     </script>
 </body>
