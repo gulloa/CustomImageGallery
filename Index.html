@@ -14,54 +14,64 @@
 	<section>
     	<h1>Image Gallery Preview</h1>
         <div class="image-gallery items-10" id="demoGallery">
-        	<div class="viewer">
-            	<ul class="list-inline clearfix track">
-                	<li>
-                    	<figure class="gallery-item">
-                            <img src="content/img/img4-3.png" class="img-responsive" />
-                        </figure>
-                    </li>
-                </ul>
+            <div class="layer-load loading-gallery">
+                <div>
+                    <span>
+                        <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                    </span>
+                    <span>Cargando...</span>
+                </div>
             </div>
-            <div class="thumbnails items-6">
-            	<div class="track">
-                    <ul class="list-inline clearfix">
+            <div class="stage">
+                <div class="viewer">
+                    <ul class="list-inline clearfix track">
                         <li>
-                            <figure class="thumbnail">
-                                <img src="content/img/img4-3.png" class="img-responsive" />
-                            </figure>
-                        </li>
-                        <li>
-                            <figure class="thumbnail">
-                                <img src="content/img/img4-3.png" class="img-responsive" />
-                            </figure>
-                        </li>
-                        <li>
-                            <figure class="thumbnail">
-                                <img src="content/img/img4-3.png" class="img-responsive" />
-                            </figure>
-                        </li>
-                        <li>
-                            <figure class="thumbnail">
-                                <img src="content/img/img4-3.png" class="img-responsive" />
-                            </figure>
-                        </li>
-                        <li>
-                            <figure class="thumbnail">
-                                <img src="content/img/img4-3.png" class="img-responsive" />
-                            </figure>
-                        </li>
-                        <li>
-                            <figure class="thumbnail">
+                            <figure class="gallery-item">
                                 <img src="content/img/img4-3.png" class="img-responsive" />
                             </figure>
                         </li>
                     </ul>
                 </div>
-            </div>
-            <div class="controls">
-                <button type="button" class="prev">prev</button>
-                <button type="button" class="next">next</button>
+                <div class="thumbnails items-6">
+                    <div class="track">
+                        <ul class="list-inline clearfix">
+                            <li>
+                                <figure class="thumbnail">
+                                    <img src="content/img/img4-3.png" class="img-responsive" />
+                                </figure>
+                            </li>
+                            <li>
+                                <figure class="thumbnail">
+                                    <img src="content/img/img4-3.png" class="img-responsive" />
+                                </figure>
+                            </li>
+                            <li>
+                                <figure class="thumbnail">
+                                    <img src="content/img/img4-3.png" class="img-responsive" />
+                                </figure>
+                            </li>
+                            <li>
+                                <figure class="thumbnail">
+                                    <img src="content/img/img4-3.png" class="img-responsive" />
+                                </figure>
+                            </li>
+                            <li>
+                                <figure class="thumbnail">
+                                    <img src="content/img/img4-3.png" class="img-responsive" />
+                                </figure>
+                            </li>
+                            <li>
+                                <figure class="thumbnail">
+                                    <img src="content/img/img4-3.png" class="img-responsive" />
+                                </figure>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button type="button" class="prev">prev</button>
+                    <button type="button" class="next">next</button>
+                </div>
             </div>
         </div>
         <div class="data-panel">
@@ -76,12 +86,12 @@
     <script type="text/javascript" src="scripts/jQuery-1.11.3.js"></script>
     <script type="text/javascript" src="scripts/jquery.touchSwipe.min.js"></script>
     <script type="text/javascript" src="scripts/imageGallery.js"></script>
-    <!--<script type="text/javascript">
+    <script type="text/javascript">
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    </script>-->
+    </script><!---->
     <script type="text/javascript">
         $(document).ready(function(){
             //App.Plugins.ImageGallery.Init();
