@@ -903,6 +903,7 @@ App.Plugins = (function(){
 
         var _oSettings, _sGalleryID, _arrVideosReady, _arrVideos, _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
         var _wkDataParser, _wkItemBuilder, _wkPreRender;
+        var _oSwipeGallery;
 
         //controllers
         var _next = function() {};
@@ -1071,8 +1072,6 @@ App.Plugins = (function(){
                             _bindYouTubeVideo(_oSettings.id);
                         };
                         
-                        //bind controls and swipe events
-
 
                         //gallery ready:  _OnGalleryReady();
                         var oGallery = document.getElementById(_sGalleryID);
@@ -1080,15 +1079,13 @@ App.Plugins = (function(){
                             var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
                             oPreloader.setAttribute('class', 'layer-load loading-gallery-off hidden');
 
+                            
+
                             //init swipe binding
-                            /*
-                            var swipeOptions = {
-                                triggerOnTouchEnd: false,
-                                swipeStatus: _swipeCallback, //_swipeStatus,
-                                allowPageScroll: "vertical",
-                                threshold: 90
-                            };
-                            */
+                            _oSwipeGallery = App.Plugins.SwipeGallery();
+                            _oSwipeGallery.Init('');
+
+                            //bind controls and swipe events
 
                         });
 
