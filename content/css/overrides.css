@@ -151,6 +151,9 @@
 	background-position: center center;
 	background-repeat: no-repeat;
     background-size: cover;
+    -webkit-border-radius:3px;
+       -moz-border-radius:3px;
+       		border-radius:3px;
 }
 
 /*.image-gallery .thumbnails .track {width:auto;}*/
