@@ -1241,21 +1241,24 @@ App.Plugins = (function(){
         };
 
         //youtube api
-        var _bindYouTubeVideo = function (sID) { //console.log('_bindYouTubeVideo');
+        var _bindYouTubeVideo = function (sGalleryID) { //console.log('_bindYouTubeVideo');
             window.App.Cache = window.App.Cache || {};
-            window.App.Cache.YTVideos = window.App.Cache.YTVideos || []; 
+            window.App.Cache.YTVideos = window.App.Cache.YTVideos || [];  console.log('YTVideos length: '+window.App.Cache.YTVideos.length);
 
-            var sID = sID;
-            var oGallery = document.getElementById(sID);
+            var sGalleryId = sGalleryID;
+            var oGallery = document.getElementById(sGalleryId);
             var oVideoWrappers = oGallery.querySelectorAll('.video-wrapper');  
             var iVideoWrappersLength = oVideoWrappers.length;   console.log('wrappers length: '+iVideoWrappersLength);
             //var arrYTVideos = window.App.Cache.YTVideos;        console.log('YTVideos length: '+arrYTVideos.length);
+            var bPlayerAPIReady = typeof window.YT.Player === 'function' ? true : false;
+            _arrVideosReady = new Array();
 
             //arrYTVideos = window.App.Cache.YTVideos;
             console.log('wrappers:');
             console.log(oVideoWrappers);
+
             for(var i = 0; i < iVideoWrappersLength; i++) {
-                var sID = 'video-' + (i+1);
+                var sID = sGalleryId+'-video-' + (i+1);
                 var oElem = oVideoWrappers[i].querySelector('.yt-player');
                 var sYTvideoID = oElem.getAttribute("data-ytid");
 
@@ -1264,21 +1267,60 @@ App.Plugins = (function(){
                 // console.log('YTVideos value at index '+i+': '+arrYTVideos[i]);
                 _arrVideos[i] = sYTvideoID; 
                 console.log('_arrVideos length: '+_arrVideos.length);
+
+                console.log('YTVideos length: '+window.App.Cache.YTVideos.length);
                 
                 var iVideosLenght = oVideoWrappers.length; 
-                var iArrayIndex = iVideosLenght > 0 ? iVideosLenght + i : i;
+                //var iArrayIndex = iVideosLenght > 0 ? iVideosLenght + i : i;
 
                 oElem.setAttribute('id', sID);
-
-                if (typeof window.YT.Player === 'function') {
-                    window.App.Cache.YTVideos[iArrayIndex] = new YT.Player(sID, {
+                if(bPlayerAPIReady) {
+                //if (typeof window.YT.Player === 'function') {
+                    var oVideo = {
+                        id: sYTvideoID,
+                        player: new YT.Player(sID, {
+                            height: '390',
+                            width: '640',
+                            videoId: sYTvideoID,
+                            playerVars: {
+                                showinfo: 0,
+                                modestbranding: 0,
+                                rel: 0,
+                                enablejsapi: 1,
+                                origin: window.location.hostname+':8080'
+                            },
+                            events: {
+                                'onStateChange': function (event) {
+                                    if (event.data == YT.PlayerState.ENDED) 
+                                        event.target.stopVideo();
+                                },
+                                'onReady': function (event) {
+                                    var sElemID = event.target.a.id || event.target.a.getAttribute('data-ytid');
+                                    _arrVideosReady.push(sElemID);
+                                    console.log('pushed: '); console.log(sElemID);
+                                    console.log('_arrVideosReady.length: '+_arrVideosReady.length); 
+                                    console.log('window.App.Cache.YTVideos.length: '+window.App.Cache.YTVideos.length); 
+                                    if(_arrVideosReady.length == window.App.Cache.YTVideos.length) {
+                                        _OnGalleryReady();
+                                        console.log('GalleryReady');
+                                    }
+                                }
+                            }
+                        })
+                    };
+                    window.App.Cache.YTVideos[i] = oVideo;
+                    /*
+                    window.App.Cache.YTVideos[iArrayIndex].id = sYTvideoID;
+                    window.App.Cache.YTVideos[iArrayIndex].player = new YT.Player(sID, {
                         height: '390',
                         width: '640',
                         videoId: sYTvideoID,
                         playerVars: {
                             showinfo: 0,
                             modestbranding: 0,
-                            rel: 0
+                            rel: 0,
+                            enablejsapi: 0,
+                            origin: window.location.hostname+':8080'
                         },
                         events: {
                             'onStateChange': function (event) {
@@ -1287,7 +1329,7 @@ App.Plugins = (function(){
                             },
                             'onReady': function (event) {
                                 _arrVideosReady.push(sYTvideoID);
-                                // console.log('event: '); console.log(event);
+                                console.log('event: '); console.log(event);
                                 // console.log('Event fired: YT onReady');
                                 // console.log('_arrVideosReady.length: '+_arrVideosReady.length);
                                 // console.log('_arrVideos.length: '+_arrVideos.length);
@@ -1301,6 +1343,7 @@ App.Plugins = (function(){
                             }
                         }
                     });
+                    */
                 }
                 else {
                     console.log("YT object doesn't exist");
