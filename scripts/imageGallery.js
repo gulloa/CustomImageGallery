@@ -515,7 +515,7 @@ App.Plugins = (function(){
 
     var CustomImageGallery = function(){
 
-        var _oSettings, _sGalleryID, _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
+        var _oSettings, _sGalleryID, _arrVideosReady, _arrVideos, _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
         var _wkDataParser, _wkItemBuilder, _wkPreRender;
 
         //controllers
@@ -527,25 +527,37 @@ App.Plugins = (function(){
         var _togglePlayback = function() {};
         var _preload = function() {};
 
-        var _bindYouTubeVideo = function (sID) {       
+        var _bindYouTubeVideo = function (sID) { //console.log('_bindYouTubeVideo');
+            window.App.Cache = window.App.Cache || {};
+            window.App.Cache.YTVideos = window.App.Cache.YTVideos || []; 
+
             var sID = sID;
             var oGallery = document.getElementById(sID);
-            var oVideoWrappers = oGallery.querySelectorAll('.video-wrapper');
+            var oVideoWrappers = oGallery.querySelectorAll('.video-wrapper');  
+            var iVideoWrappersLength = oVideoWrappers.length;   console.log('wrappers length: '+iVideoWrappersLength);
+            //var arrYTVideos = window.App.Cache.YTVideos;        console.log('YTVideos length: '+arrYTVideos.length);
 
-            window.videos = window.videos || [];
-            window.YT = window.YT || undefined;
-
-            for(var i = 0; i < oVideoWrappers.length; i++) {
+            //arrYTVideos = window.App.Cache.YTVideos;
+            console.log('wrappers:');
+            console.log(oVideoWrappers);
+            for(var i = 0; i < iVideoWrappersLength; i++) {
                 var sID = 'video-' + (i+1);
                 var oElem = oVideoWrappers[i].querySelector('.yt-player');
                 var sYTvideoID = oElem.getAttribute("data-ytid");
-                var iVideosLenght = window.videos.length;
+
+                // arrYTVideos[i] = sYTvideoID; 
+                // console.log('YTVideos Push length: '+arrYTVideos.length);
+                // console.log('YTVideos value at index '+i+': '+arrYTVideos[i]);
+                _arrVideos[i] = sYTvideoID; 
+                console.log('_arrVideos length: '+_arrVideos.length);
+                
+                var iVideosLenght = oVideoWrappers.length; 
                 var iArrayIndex = iVideosLenght > 0 ? iVideosLenght + i : i;
 
                 oElem.setAttribute('id', sID);
 
                 if (typeof window.YT.Player === 'function') {
-                    window.videos[iArrayIndex] = new YT.Player(sID, {
+                    window.App.Cache.YTVideos[iArrayIndex] = new YT.Player(sID, {
                         height: '390',
                         width: '640',
                         videoId: sYTvideoID,
@@ -556,8 +568,22 @@ App.Plugins = (function(){
                         },
                         events: {
                             'onStateChange': function (event) {
-                                if (event.data == YT.PlayerState.ENDED)
+                                if (event.data == YT.PlayerState.ENDED) 
                                     event.target.stopVideo();
+                            },
+                            'onReady': function (event) {
+                                _arrVideosReady.push(sYTvideoID);
+                                console.log('event: '); console.log(event);
+                                console.log('Event fired: YT onReady');
+                                console.log('_arrVideosReady.length: '+_arrVideosReady.length);
+                                console.log('_arrVideos.length: '+_arrVideos.length);
+
+                                if(_arrVideosReady.length == _arrVideos.length) {
+                                    //_OnGalleryReady();
+                                    var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
+                                    oPreloader.setAttribute('class', 'layer-load loading-gallery hidden');
+                                    console.log('preloader removed');
+                                }
                             }
                         }
                     });
@@ -577,11 +603,9 @@ App.Plugins = (function(){
         };
 
         var _render = function(sStringifiedJSON) {
+            console.log('rendering...');
             var sData = sStringifiedJSON;
-            // console.log('RECEIVED String');
-            // console.log(sData);
-
-            var oGallery = document.getElementById('demoGallery');
+            var oGallery = document.getElementById(_sGalleryID).querySelector('.stage');
             oGallery.innerHTML = sData;
 
             //calculate images sizing (dynamic sizing)
@@ -631,20 +655,23 @@ App.Plugins = (function(){
                 },
                 data: oSettings.data
             }
-
             _sGalleryID = _oSettings.id;
+            _arrVideosReady = new Array();
+            _arrVideos = new Array();
 
             if(_oSettings.data != null) {
 
-                _createYTObject();
+                //_createYTObject();
 
                 if(_webworkersSupported) {
 
                     _startWorkers();
 
                     _wkPreRender.addEventListener('message', function(e) {
+
+                        //render markup
                         var sMarkup = e.data;  //console.log('e.data: '); console.log(e.data);
-                        _render(sMarkup);
+                        _render(sMarkup); //return;
 
                         //calculate images sizing (dynamic sizing)
 
@@ -662,6 +689,11 @@ App.Plugins = (function(){
 
 
                         //gallery ready:  _OnGalleryReady();
+                        // var oGallery = document.getElementById(_sGalleryID);
+                        // oGallery.addEventListener('OnGalleryReady', function() {
+                        //     var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
+                        //     oPreloader.setAttribute('class', 'layer-load loading-gallery-off hidden');
+                        // });
 
                     }, false);
 
@@ -687,7 +719,7 @@ App.Plugins = (function(){
             customEvent.initEvent('OnGalleryReady', true, true);
 
             var elem = document.getElementById(_sGalleryID);
-            elem.dispatchEvent(customEvent);
+            elem.dispatchEvent(customEvent); //console.log('Event fired: OnGalleryReady');
         };
         var _OnNextSlide = function() {
             // Create the event.
