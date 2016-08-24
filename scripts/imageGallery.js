@@ -682,7 +682,7 @@ App.Plugins = (function(){
     }
 
     return {
-        SwipeGallery: SwipeImageGallery,
         CustomImageGallery: CustomImageGallery
     }
+    
 })();
