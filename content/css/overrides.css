@@ -4,6 +4,7 @@
 
 /* image gallery */
 .image-gallery {
+	position: relative;
 	width:100%;
 	height:56.3%;
 	padding:0;
@@ -99,7 +100,7 @@
 	width:100%;
 	max-width:100%;
 	height:auto;
-	border:3px solid royalblue;
+	border:1px solid #ddd; /*royalblue;*/
 	outline:none;
 	background-position: center center;
 	background-repeat: no-repeat;
