@@ -7,8 +7,7 @@ App.Plugins = (function(){
         var _oSettings, _sGalleryID, _arrVideosReady, _arrVideos, _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
         var _wkDataParser, _wkItemBuilder, _wkPreRender;
         var _oSwipeGallery;
-
-        var _iCurrentSlideIndex = 0, _iThumbsClusterSize, _iCurrentCluster = 0;
+        var _iCurrentSlideIndex = 0, _iThumbsClusterSize;
 
         //helper functions
         var _getIEVersion = function() {
@@ -94,14 +93,32 @@ App.Plugins = (function(){
             });
         };
 
-        //controllers
+        //exposed methods
+        var _nextSlide = function() {
+            document.getElementById(_sGalleryID).querySelector('.controls .next').click();
+        };
+        var _previousSlide = function() {
+            document.getElementById(_sGalleryID).querySelector('.controls .prev').click();
+        };
+        var _slideToIndex = function(iTargetIndex) {
+            var iIndex = parseInt(iTargetIndex);
+            if(iIndex > 0 && iIndex < window.App.Cache.YTVideos.length) {
+                _goToSlide(iIndex);
+            }            
+        };
+        var _pause = function() {};
+        var _play = function() {};
+        var _togglePlayback = function() {};
+        var _preload = function() {};
+
+        //playback controllers 
         var _next = function(event) {
-            _swipeImages(event, "next");
-            _swipeThumbnails(event, "next");
+            _slideViewer(event, "next");
+            _slideThumbnails(event, "next");
         };
         var _previous = function(event) {
-            _swipeImages(event, "prev");
-            _swipeThumbnails(event, "prev");
+            _slideViewer(event, "prev");
+            _slideThumbnails(event, "prev");
         };
         var _goToSlide = function(iTargetIndex) {
             var sJQSelector = '#'+_sGalleryID;
@@ -128,18 +145,17 @@ App.Plugins = (function(){
                     _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
                 }
                 _iCurrentSlideIndex = iTargetIndex;
+                _OnChangeSlide();
             } 
             else {
                 _iCurrentSlideIndex = iTargetIndex;
                 var iValue = (_iCurrentSlideIndex * 100);
                 var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
-                jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
+                jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { 
+                    _OnChangeSlide();
+                });
             }
         };
-        var _pause = function() {};
-        var _play = function() {};
-        var _togglePlayback = function() {};
-        var _preload = function() {};
 
         //slide animation
         var _setAnimationProperties = function(jqo, duration, position, usePercentage) {
@@ -171,7 +187,7 @@ App.Plugins = (function(){
                 jqoTrack.attr('style', sCSSValue);
             }
         }
-        var _swipeImages = function(e, direction) {
+        var _slideViewer = function(e, direction) {
             if(e && e.preventDefault)
                 e.preventDefault();
 
@@ -206,25 +222,23 @@ App.Plugins = (function(){
                     } else {
                         _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
                     }
+                    if(direction == "next") {_OnNextSlide();}
+                    if(direction == "prev") {_OnPrevSlide();}
+                    _OnChangeSlide();
                 } 
                 else {
                     _iCurrentSlideIndex = iNextIndex;
                     var iValue = (_iCurrentSlideIndex * 100);
                     var sPosition = iValue == 0 ? 0 : '-' + iValue.toString() + '%';
-                    jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
+                    jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { 
+                        if(direction == "next") {_OnNextSlide();}
+                        if(direction == "prev") {_OnPrevSlide();}
+                        _OnChangeSlide();
+                    });
                 }
             }
-
-            // Create the event.
-            var customEvent = document.createEvent('HTMLEvents');
-
-            // Define that the event name is 'build'.
-            customEvent.initEvent('onSlide', true, true);
-
-            var elem = document.getElementById(_sGalleryID);
-            elem.dispatchEvent(customEvent);
         };        
-        var _swipeThumbnails = function(e, direction) {
+        var _slideThumbnails = function(e, direction) {
             if(e && e.preventDefault)
                 e.preventDefault();
 
@@ -265,15 +279,6 @@ App.Plugins = (function(){
                     jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
                 }
             }
-
-            // Create the event.
-            var customEvent = document.createEvent('HTMLEvents');
-
-            // Define that the event name is 'build'.
-            customEvent.initEvent('onSlide', true, true);
-
-            var elem = document.getElementById(_sGalleryID);
-            elem.dispatchEvent(customEvent);
         };
         var _swipeCallback = function(event, phase, direction, distance) {
             var sPhase = phase; 
@@ -282,12 +287,12 @@ App.Plugins = (function(){
                 case "end":
                     var sDirection = direction;
                     if(sDirection == "left") {
-                        _swipeImages(event, "next");
-                        _swipeThumbnails(event, "next");
+                        _slideViewer(event, "next");
+                        _slideThumbnails(event, "next");
                     }
                     else if(sDirection == "right") {
-                        _swipeImages(event, "prev");
-                        _swipeThumbnails(event, "prev");
+                        _slideViewer(event, "prev");
+                        _slideThumbnails(event, "prev");
                     }
                     break;
                 case "move":
@@ -453,7 +458,6 @@ App.Plugins = (function(){
             _arrVideos = new Array();
 
             if(_oSettings.data != null) {
-
                 //_createYTObject();
 
                 if(_webworkersSupported) {
@@ -543,6 +547,7 @@ App.Plugins = (function(){
 
             var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent);
+            console.log('next');
         };
         var _OnPrevSlide = function() {
             // Create the event.
@@ -553,6 +558,18 @@ App.Plugins = (function(){
 
             var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent);
+            console.log('prev');
+        };
+        var _OnChangeSlide = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('onChangeSlide', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+            console.log('change slide');
         };
         var _OnPausePlayback = function() {
             // Create the event.
@@ -597,9 +614,9 @@ App.Plugins = (function(){
 
         //expose methods
         return {
-            NextSlide: _next,
-            PreviousSlide: _previous,
-            GoToSlide: _goToSlide,
+            NextSlide: _nextSlide,
+            PreviousSlide: _previousSlide,
+            GoToSlide: _slideToIndex,
             PausePlayback: _pause,
             Destroy: _destroy,
             Init: _init
