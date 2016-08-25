@@ -154,6 +154,7 @@ App.Plugins = (function(){
             if(!bCanSwipeNextIndex)
                 return;
 
+            _OnBeforeChangeSlide();
             if(bCSSAnimation) {
                 _iCurrentSlideIndex = iTargetIndex;
                 var iValue = (iTargetIndex * itemWidth);
@@ -256,6 +257,7 @@ App.Plugins = (function(){
             var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0; 
 
             if (bCanSwipeNextIndex) {
+                _OnBeforeChangeSlide();
                 var jqoListItems = $('.viewer ul li', sJQSelector);
                 var itemWidth = Math.abs(jqoListItems.width()); 
                 var jqoTrack= $('.viewer .track', sJQSelector);
@@ -428,8 +430,23 @@ App.Plugins = (function(){
                             },
                             events: {
                                 'onStateChange': function (event) {
-                                    if (event.data == YT.PlayerState.ENDED) 
+                                    if (event.data == YT.PlayerState.ENDED) {
                                         event.target.stopVideo();
+
+                                        if(_oSettings.autoplay) {
+                                            _play(_oSettings.animation.holdTime);
+                                        }
+                                    }
+                                    if (event.data == YT.PlayerState.BUFFERING) {
+                                        if(_oSettings.autoplay) {
+                                            _pause();
+                                        }
+                                    }
+                                    if (event.data == YT.PlayerState.PLAYING) {
+                                        if(_oSettings.autoplay) {
+                                            _pause();
+                                        }
+                                    }
                                 },
                                 'onReady': function (event) {
                                     var sElemID = event.target.a.id || event.target.a.getAttribute('data-ytid');
@@ -565,6 +582,37 @@ App.Plugins = (function(){
                             }
 
                         });
+                        
+                        //handle video playback and loop before changing slide
+                        oGallery.addEventListener('OnBeforeChangeSlide', function(e) {
+                            var sCurrentVideoID = _oSettings.data[_iCurrentSlideIndex].videoID;
+                            if(sCurrentVideoID) {
+                                var iCurrentVideoIndex = _arrVideos.indexOf(sCurrentVideoID);
+                                var oVideoData = window.App.Cache.YTVideos[iCurrentVideoIndex];
+                                var oPlayer = oVideoData.player;
+                                var nPlayerState = oPlayer.getPlayerState();
+
+                                if(nPlayerState == 1) {
+                                    oPlayer.pauseVideo();
+                                    if(_oSettings.autoplay && _playbackTimer != null) {
+                                        _play(_oSettings.animation.holdTime);
+                                    }
+                                }
+                            }
+                        });     
+                        oGallery.querySelectorAll('.controls button').addEventListener('click', function(e) {
+                            var sCurrentVideoID = _oSettings.data[_iCurrentSlideIndex].videoID;
+                            if(sCurrentVideoID) {
+                                var iCurrentVideoIndex = _arrVideos.indexOf(sCurrentVideoID);
+                                var oVideoData = window.App.Cache.YTVideos[iCurrentVideoIndex];
+                                var oPlayer = oVideoData.player;
+                                var nPlayerState = oPlayer.getPlayerState();
+
+                                if(nPlayerState == 3) {
+                                    oPlayer.stopVideo();
+                                }
+                            }
+                        });/**/
 
                     }, false);
 
@@ -631,6 +679,17 @@ App.Plugins = (function(){
             var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent);
             console.log('change slide');
+        };
+        var _OnBeforeChangeSlide = function() {
+            // Create the event.
+            var customEvent = document.createEvent('HTMLEvents');
+
+            // Define that the event name is 'build'.
+            customEvent.initEvent('OnBeforeChangeSlide', true, true);
+
+            var elem = document.getElementById(_sGalleryID);
+            elem.dispatchEvent(customEvent);
+            console.log('before change slide');
         };
         var _OnPausePlayback = function() {
             // Create the event.
