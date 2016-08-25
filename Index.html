@@ -98,7 +98,7 @@
             var demoGallery = new Plugins.CustomImageGallery();
             var oGallerySettings = {
                 id: 'demoGallery',
-                autoplay: true,
+                autoplay: false,
                 animation: {
                     holdTime: 3000, // milliseconds
                     transitionTime: 600 // milliseconds
@@ -175,15 +175,15 @@
             }
             demoGallery.Init(oGallerySettings);
 
-            var elemGallery = document.getElementById(oGallerySettings.id);
-            elemGallery.addEventListener('OnGalleryReady', function() {
-                demoGallery.GoToSlide(10);
-                demoGallery.NextSlide();
-                var timer = setInterval(function(){
-                    demoGallery.PreviousSlide();
-                    clearInterval(timer);
-                },3000);
-            });
+            // var elemGallery = document.getElementById(oGallerySettings.id);
+            // elemGallery.addEventListener('OnGalleryReady', function() {
+            //     demoGallery.GoToSlide(10);
+            //     demoGallery.NextSlide();
+            //     var timer = setInterval(function(){
+            //         demoGallery.PreviousSlide();
+            //         clearInterval(timer);
+            //     },3000);
+            // });
         });
     </script>
 </body>
