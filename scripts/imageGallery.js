@@ -8,7 +8,7 @@ App.Plugins = (function(){
         var _wkDataParser, _wkItemBuilder, _wkPreRender;
         var _oSwipeGallery;
 
-        var _iCurrentSlideIndex = 0, _sGalleryID, _iThumbsClusterSize, _iCurrentCluster = 0;
+        var _iCurrentSlideIndex = 0, _iThumbsClusterSize, _iCurrentCluster = 0;
 
         //helper functions
         var _getIEVersion = function() {
@@ -97,15 +97,13 @@ App.Plugins = (function(){
         //controllers
         var _next = function(event) {
             _swipeImages(event, "next");
-            _swipeTrackImages(event, "next");
+            _swipeThumbnails(event, "next");
         };
         var _previous = function(event) {
             _swipeImages(event, "prev");
-            _swipeTrackImages(event, "prev");
+            _swipeThumbnails(event, "prev");
         };
         var _goToSlide = function(iTargetIndex) {
-            console.log('iTargetIndex: '+iTargetIndex);
-
             var sJQSelector = '#'+_sGalleryID;
             var jqoTrack= $('.viewer .track', sJQSelector);
             var jqoListItems = $('.viewer ul li', sJQSelector);
@@ -115,12 +113,12 @@ App.Plugins = (function(){
             var isIE = _getIEVersion();
             var bCSSTransitions = Modernizr.csstransitions;
             var bCSSTransforms = Modernizr.csstransforms;
-            var bCSSAnimation = bCSSTransitions && bCSSTransforms; console.log('bCSSAnimation: '+bCSSAnimation);
+            var bCSSAnimation = bCSSTransitions && bCSSTransforms; 
 
             if(bCSSAnimation) {
                 _iCurrentSlideIndex = iTargetIndex;
                 var iValue = (iTargetIndex * itemWidth);
-                var nPercentage = (iValue * 100) / iTrackWidth; console.log('percentage: ' + nPercentage);
+                var nPercentage = (iValue * 100) / iTrackWidth; 
                 var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
                 var nDuration = 0.6;
 
@@ -145,9 +143,8 @@ App.Plugins = (function(){
 
         //slide animation
         var _setAnimationProperties = function(jqo, duration, position, usePercentage) {
-            console.log('Inside of setAnimationProperties');
             var sCSSTransitionDuration, sCSSTransform, sCSSValue, bIsIE, jqoTrack, iDuration, sPosition, bUsePercentage;
-            _nTranslateX = position; console.log('translateX set to: '+_nTranslateX);
+            _nTranslateX = position; 
 
             iDuration = duration;
             sPosition = !usePercentage ? position.toString() + 'px' : position.toString() + '%';
@@ -175,8 +172,6 @@ App.Plugins = (function(){
             }
         }
         var _swipeImages = function(e, direction) {
-            console.log('_iCurrentSlideIndex: '+_iCurrentSlideIndex);
-
             if(e && e.preventDefault)
                 e.preventDefault();
 
@@ -186,8 +181,8 @@ App.Plugins = (function(){
             var sJQSelector = '#'+_sGalleryID;
             var jqoGalleryItems = $('.viewer .gallery-item', sJQSelector);
             var iGallerySize = jqoGalleryItems.length;
-            var iNextIndex = direction == "next" ? parseInt(_iCurrentSlideIndex) + 1 : parseInt(_iCurrentSlideIndex) - 1;   console.log('from button iNextIndex: '+iNextIndex);
-            var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  //-console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
+            var iNextIndex = direction == "next" ? parseInt(_iCurrentSlideIndex) + 1 : parseInt(_iCurrentSlideIndex) - 1; 
+            var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0; 
 
             if (bCanSwipeNextIndex) {
                 var jqoListItems = $('.viewer ul li', sJQSelector);
@@ -197,12 +192,12 @@ App.Plugins = (function(){
                 var isIE = _getIEVersion();
                 var bCSSTransitions = Modernizr.csstransitions;
                 var bCSSTransforms = Modernizr.csstransforms;
-                var bCSSAnimation = bCSSTransitions && bCSSTransforms;      console.log('bCSSAnimation: '+bCSSAnimation);
+                var bCSSAnimation = bCSSTransitions && bCSSTransforms; 
 
                 if(bCSSAnimation) {
                     _iCurrentSlideIndex = iNextIndex;
                     var iValue = (parseInt(_iCurrentSlideIndex) * itemWidth);
-                    var nPercentage = (iValue * 100) / iTrackWidth;         console.log('percentage: ' + nPercentage);
+                    var nPercentage = (iValue * 100) / iTrackWidth; 
                     var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
                     var nDuration = 0.6;
 
@@ -229,10 +224,7 @@ App.Plugins = (function(){
             var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent);
         };        
-        var _swipeTrackImages = function(e, direction) {
-            console.log('_swipeTrackImages ---------------------------');
-            console.log('_iCurrentSlideIndex: '+_iCurrentSlideIndex);
-
+        var _swipeThumbnails = function(e, direction) {
             if(e && e.preventDefault)
                 e.preventDefault();
 
@@ -242,8 +234,8 @@ App.Plugins = (function(){
             var sJQSelector = '#'+_sGalleryID;
             var jqoGalleryItems = $('.thumbnails .thumbnail', sJQSelector);
             var iGallerySize = jqoGalleryItems.length;
-            var iNextIndex = direction == "next" ? parseInt(_iCurrentSlideIndex) : parseInt(_iCurrentSlideIndex);   console.log('from button iNextIndex: '+iNextIndex);
-            var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0;  //-console.log('bCanSwipeNextIndex: '+bCanSwipeNextIndex);
+            var iNextIndex = direction == "next" ? parseInt(_iCurrentSlideIndex) : parseInt(_iCurrentSlideIndex); 
+            var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0; 
 
             if (bCanSwipeNextIndex) {
                 var jqoListItems = $('.thumbnails ul li', sJQSelector);
@@ -253,12 +245,11 @@ App.Plugins = (function(){
                 var isIE = _getIEVersion();
                 var bCSSTransitions = Modernizr.csstransitions;
                 var bCSSTransforms = Modernizr.csstransforms;
-                var bCSSAnimation = bCSSTransitions && bCSSTransforms;      console.log('bCSSAnimation: '+bCSSAnimation);
+                var bCSSAnimation = bCSSTransitions && bCSSTransforms; 
 
                 if(bCSSAnimation) {
-                    //_iCurrentSlideIndex = iNextIndex;
                     var iValue = (parseInt(_iCurrentSlideIndex) * itemWidth);
-                    var nPercentage = (iValue * 100) / iTrackWidth;         console.log('percentage: ' + nPercentage);
+                    var nPercentage = (iValue * 100) / iTrackWidth; 
                     var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
                     var nDuration = 0.6;
 
@@ -269,7 +260,6 @@ App.Plugins = (function(){
                     }
                 } 
                 else {
-                    //_iCurrentSlideIndex = iNextIndex;
                     var iValue = (_iCurrentSlideIndex * 100);
                     var sPosition = iValue == 0 ? 0 : '-' + iValue.toString() + '%';
                     jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
@@ -284,24 +274,20 @@ App.Plugins = (function(){
 
             var elem = document.getElementById(_sGalleryID);
             elem.dispatchEvent(customEvent);
-
-            console.log('---------------------------');
         };
         var _swipeCallback = function(event, phase, direction, distance) {
             var sPhase = phase; 
 
             switch(sPhase) {
                 case "end":
-                    console.log('end');
-
                     var sDirection = direction;
                     if(sDirection == "left") {
                         _swipeImages(event, "next");
-                        _swipeTrackImages(event, "next");
+                        _swipeThumbnails(event, "next");
                     }
                     else if(sDirection == "right") {
                         _swipeImages(event, "prev");
-                        _swipeTrackImages(event, "prev");
+                        _swipeThumbnails(event, "prev");
                     }
                     break;
                 case "move":
@@ -313,35 +299,18 @@ App.Plugins = (function(){
         var _bindSwipe = function (oSettings) {
             _extendJQueryEasing();
             var oInteractionSettings = oSettings;
-            var sGallerySelector = '#'+_sGalleryID;
-
             _iThumbsClusterSize = oInteractionSettings.thumbnails.clusterSize;
 
             document.getElementById(_sGalleryID).querySelector('.controls .next').addEventListener('click', _next);
             document.getElementById(_sGalleryID).querySelector('.controls .prev').addEventListener('click', _previous);
 
-            // $('.controls .next', sGallerySelector).bind('click', _next);
-            // $('.controls .prev', sGallerySelector).bind('click', _previous);
-
             $('#csstransitions label').text(Modernizr.csstransitions);
             $('#csstransforms label').text(Modernizr.csstransforms);
-
-            /*var $tumbnails = $(sGallerySelector).find('.thumbnail');
-            $.each($tumbnails, function(key, value){
-                console.log( key + ": " + value );
-                var oItem = value;
-                oItem.setAttribute('data-id', key);
-                oItem.addEventListener('click', function(e){
-                    var iTarget = this.getAttribute('data-id');
-                    _goToSlide(iTarget);
-                });
-            });*/
 
             var arrThumbnails = document.getElementById(_sGalleryID).querySelectorAll('.thumbnail');
             var iThumbsLength = arrThumbnails.length;
             for(var i = 0; i<iThumbsLength; i++){
                 var oItem = arrThumbnails[i];
-                console.log( i + ": " + oItem);
                 oItem.setAttribute('data-id', i);
                 oItem.addEventListener('click', function(e){
                     var iTarget = this.getAttribute('data-id');
@@ -351,55 +320,38 @@ App.Plugins = (function(){
 
             var swipeOptions = {
                 triggerOnTouchEnd: false,
-                swipeStatus: _swipeCallback, //_swipeStatus,
+                swipeStatus: _swipeCallback, 
                 allowPageScroll: "vertical",
                 threshold: 90
             };
 
-            //var jqoImgs = $(sGallerySelector+" .viewer");
             var oViewer = document.getElementById(_sGalleryID).querySelector('.viewer');
             $(oViewer).swipe(swipeOptions);
-
-            console.log("view initialized");
             _OnSwipeReady();
         };
 
         //youtube api
-        var _bindYouTubeVideo = function (sGalleryID) { //console.log('_bindYouTubeVideo');
+        var _bindYouTubeVideo = function (sTargetID) { 
             window.App.Cache = window.App.Cache || {};
-            window.App.Cache.YTVideos = window.App.Cache.YTVideos || [];  console.log('YTVideos length: '+window.App.Cache.YTVideos.length);
-
-            var sGalleryId = sGalleryID;
-            var oGallery = document.getElementById(sGalleryId);
-            var oVideoWrappers = oGallery.querySelectorAll('.video-wrapper');  
-            var iVideoWrappersLength = oVideoWrappers.length;   console.log('wrappers length: '+iVideoWrappersLength);
-            //var arrYTVideos = window.App.Cache.YTVideos;        console.log('YTVideos length: '+arrYTVideos.length);
-            var bPlayerAPIReady = typeof window.YT.Player === 'function' ? true : false;
+            window.App.Cache.YTVideos = window.App.Cache.YTVideos || []; 
             _arrVideosReady = new Array();
 
-            //arrYTVideos = window.App.Cache.YTVideos;
-            console.log('wrappers:');
-            console.log(oVideoWrappers);
+            var sGalleryId = sTargetID;
+            var oGallery = document.getElementById(sGalleryId);
+            var oVideoWrappers = oGallery.querySelectorAll('.video-wrapper');  
+            var iVideoWrappersLength = oVideoWrappers.length; 
+            var bPlayerAPIReady = typeof window.YT.Player === 'function' ? true : false;
 
             for(var i = 0; i < iVideoWrappersLength; i++) {
                 var sID = sGalleryId+'-video-' + (i+1);
                 var oElem = oVideoWrappers[i].querySelector('.yt-player');
                 var sYTvideoID = oElem.getAttribute("data-ytid");
+                var iVideosLenght = iVideoWrappersLength; 
 
-                // arrYTVideos[i] = sYTvideoID; 
-                // console.log('YTVideos Push length: '+arrYTVideos.length);
-                // console.log('YTVideos value at index '+i+': '+arrYTVideos[i]);
-                _arrVideos[i] = sYTvideoID; 
-                console.log('_arrVideos length: '+_arrVideos.length);
-
-                console.log('YTVideos length: '+window.App.Cache.YTVideos.length);
-                
-                var iVideosLenght = oVideoWrappers.length; 
-                //var iArrayIndex = iVideosLenght > 0 ? iVideosLenght + i : i;
-
+                _arrVideos[i] = sYTvideoID;
                 oElem.setAttribute('id', sID);
+
                 if(bPlayerAPIReady) {
-                //if (typeof window.YT.Player === 'function') {
                     var oVideo = {
                         id: sYTvideoID,
                         player: new YT.Player(sID, {
@@ -421,9 +373,9 @@ App.Plugins = (function(){
                                 'onReady': function (event) {
                                     var sElemID = event.target.a.id || event.target.a.getAttribute('data-ytid');
                                     _arrVideosReady.push(sElemID);
-                                    console.log('pushed: '); console.log(sElemID);
-                                    console.log('_arrVideosReady.length: '+_arrVideosReady.length); 
-                                    console.log('window.App.Cache.YTVideos.length: '+window.App.Cache.YTVideos.length); 
+                                    // console.log('pushed: '); console.log(sElemID);
+                                    // console.log('_arrVideosReady.length: '+_arrVideosReady.length); 
+                                    // console.log('window.App.Cache.YTVideos.length: '+window.App.Cache.YTVideos.length); 
                                     if(_arrVideosReady.length == window.App.Cache.YTVideos.length) {
                                         _OnGalleryReady();
                                         console.log('GalleryReady');
@@ -433,41 +385,6 @@ App.Plugins = (function(){
                         })
                     };
                     window.App.Cache.YTVideos[i] = oVideo;
-                    /*
-                    window.App.Cache.YTVideos[iArrayIndex].id = sYTvideoID;
-                    window.App.Cache.YTVideos[iArrayIndex].player = new YT.Player(sID, {
-                        height: '390',
-                        width: '640',
-                        videoId: sYTvideoID,
-                        playerVars: {
-                            showinfo: 0,
-                            modestbranding: 0,
-                            rel: 0,
-                            enablejsapi: 0,
-                            origin: window.location.hostname+':8080'
-                        },
-                        events: {
-                            'onStateChange': function (event) {
-                                if (event.data == YT.PlayerState.ENDED) 
-                                    event.target.stopVideo();
-                            },
-                            'onReady': function (event) {
-                                _arrVideosReady.push(sYTvideoID);
-                                console.log('event: '); console.log(event);
-                                // console.log('Event fired: YT onReady');
-                                // console.log('_arrVideosReady.length: '+_arrVideosReady.length);
-                                // console.log('_arrVideos.length: '+_arrVideos.length);
-
-                                if(_arrVideosReady.length == _arrVideos.length) {
-                                    _OnGalleryReady();
-                                    // var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
-                                    // oPreloader.setAttribute('class', 'layer-load loading-gallery hidden');
-                                    // console.log('preloader removed');
-                                }
-                            }
-                        }
-                    });
-                    */
                 }
                 else {
                     console.log("YT object doesn't exist");
@@ -489,12 +406,6 @@ App.Plugins = (function(){
             var sData = sStringifiedJSON;
             var oGallery = document.getElementById(_sGalleryID).querySelector('.stage');
             oGallery.innerHTML = sData;
-
-            //calculate images sizing (dynamic sizing)
-
-            //bind videos: a click to an image will trigger video initialization (on demand init)
-
-            //gallery ready:  _OnGalleryReady();
         };
         var _preRender = function(sStringifiedJSON) {
             var sData = sStringifiedJSON; 
@@ -552,8 +463,8 @@ App.Plugins = (function(){
                     _wkPreRender.addEventListener('message', function(e) {
 
                         //render markup
-                        var sMarkup = e.data;  //console.log('e.data: '); console.log(e.data);
-                        _render(sMarkup); //return;
+                        var sMarkup = e.data; 
+                        _render(sMarkup); 
 
                         //calculate images sizing (dynamic sizing)
 
@@ -567,8 +478,7 @@ App.Plugins = (function(){
                             _bindYouTubeVideo(_oSettings.id);
                         };
                         
-
-                        //gallery ready:  _OnGalleryReady();
+                        //gallery ready
                         var oGallery = document.getElementById(_sGalleryID);
                         oGallery.addEventListener('OnGalleryReady', function(e) {
                             var oPreloader = document.getElementById(_sGalleryID).querySelector('.loading-gallery');
@@ -578,9 +488,6 @@ App.Plugins = (function(){
                             oThis.classList.add('gallery-ready');
 
                             //init swipe binding
-                            // _oSwipeGallery = new App.Plugins.SwipeGallery();
-                            // _oSwipeGallery.Init(_sGalleryID);
-
                             var slideSettings = {
                                 autoplay: _oSettings.autoplay,
                                 animation: _oSettings.animation,
