@@ -176,14 +176,13 @@
             demoGallery.Init(oGallerySettings);
 
             var elemGallery = document.getElementById(oGallerySettings.id);
-            var elemNext = elemGallery.querySelector('.controls .next');
-            elemNext.addEventListener('click', function() {
-                console.log('next clicked');
-            });
-
-            document.getElementById(oGallerySettings.id).addEventListener('OnGalleryReady', function() {
-                //demoGallery.GoToSlide(10);
-                //demoGallery.NextSlide();
+            elemGallery.addEventListener('OnGalleryReady', function() {
+                demoGallery.GoToSlide(10);
+                demoGallery.NextSlide();
+                var timer = setInterval(function(){
+                    demoGallery.PreviousSlide();
+                    clearInterval(timer);
+                },3000);
             });
         });
     </script>

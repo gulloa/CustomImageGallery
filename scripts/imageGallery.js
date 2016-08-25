@@ -6,8 +6,8 @@ App.Plugins = (function(){
 
         var _oSettings, _sGalleryID, _arrVideosReady, _arrVideos, _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
         var _wkDataParser, _wkItemBuilder, _wkPreRender;
-        var _oSwipeGallery;
         var _iCurrentSlideIndex = 0, _iThumbsClusterSize;
+
 
         //helper functions
         var _getIEVersion = function() {
@@ -95,10 +95,12 @@ App.Plugins = (function(){
 
         //exposed methods
         var _nextSlide = function() {
-            document.getElementById(_sGalleryID).querySelector('.controls .next').click();
+            //-document.getElementById(_sGalleryID).querySelector('.controls .next').click();
+            _next();
         };
         var _previousSlide = function() {
-            document.getElementById(_sGalleryID).querySelector('.controls .prev').click();
+            //-document.getElementById(_sGalleryID).querySelector('.controls .prev').click();
+            _previous();
         };
         var _slideToIndex = function(iTargetIndex) {
             var iIndex = parseInt(iTargetIndex);
