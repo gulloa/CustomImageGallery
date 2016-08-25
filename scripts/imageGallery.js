@@ -194,7 +194,7 @@ App.Plugins = (function(){
                 _iCurrentSlideIndex = iTargetIndex;
                 var iValue = (iTargetIndex * itemWidth);
                 var nPercentage = (iValue * 100) / iTrackWidth; 
-                var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
+                var sPosition = iValue == 0 ? 0 : '-' + nPercentage;    //var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
                 var nDuration = 0.6;
 
                 if(!isIE) {
@@ -308,7 +308,7 @@ App.Plugins = (function(){
 
             if (bCanSwipeNextIndex) {
                 var jqoListItems = $('.thumbnails ul li', sJQSelector);
-                var itemWidth = Math.abs(jqoListItems.width()); 
+                var itemWidth = Math.abs(jqoListItems.width());             //-console.log('itemWidth'); console.log(itemWidth);
                 var jqoTrack= $('.thumbnails .track', sJQSelector);
                 var iTrackWidth = Math.abs(jqoTrack.width()); 
                 var isIE = _getIEVersion();
@@ -318,8 +318,8 @@ App.Plugins = (function(){
 
                 if(bCSSAnimation) {
                     var iValue = (parseInt(_iCurrentSlideIndex) * itemWidth);
-                    var nPercentage = (iValue * 100) / iTrackWidth; 
-                    var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
+                    var nPercentage = (iValue * 100) / iTrackWidth;         //-console.log('nPercentage'); console.log(nPercentage);
+                    var sPosition = iValue == 0 ? 0 : '-' + nPercentage;    //var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
                     var nDuration = 0.6;
 
                     if(!isIE) {
