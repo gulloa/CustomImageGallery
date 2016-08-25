@@ -7,7 +7,7 @@ App.Plugins = (function(){
         var _oSettings, _sGalleryID, _arrVideosReady, _arrVideos, _webworkersSupported = window.Modernizr ? Modernizr.webworkers : typeof(window.Worker) !== "undefined";
         var _wkDataParser, _wkItemBuilder, _wkPreRender;
         var _iCurrentSlideIndex = 0, _iThumbsClusterSize;
-
+        var _playbackTimer = null;
 
         //helper functions
         var _getIEVersion = function() {
@@ -95,21 +95,37 @@ App.Plugins = (function(){
 
         //exposed methods
         var _nextSlide = function() {
-            //-document.getElementById(_sGalleryID).querySelector('.controls .next').click();
             _next();
         };
         var _previousSlide = function() {
-            //-document.getElementById(_sGalleryID).querySelector('.controls .prev').click();
             _previous();
         };
         var _slideToIndex = function(iTargetIndex) {
             var iIndex = parseInt(iTargetIndex);
-            if(iIndex > 0 && iIndex < window.App.Cache.YTVideos.length) {
+            if(iIndex >= 0 && iIndex < _oSettings.data.length) {
                 _goToSlide(iIndex);
+                _goToThumbnail(iIndex);
             }            
         };
-        var _pause = function() {};
-        var _play = function() {};
+        var _pause = function() {
+            clearInterval(_playbackTimer);
+        };
+        var _play = function(iHoldTime) {
+            var iLoopFrecuency = parseInt(iHoldTime);
+
+            _playbackTimer = setInterval(function() {
+                var iDataLength = _oSettings.data.length;
+                var iLastIndex = parseInt(iDataLength-1);
+
+                if(_iCurrentSlideIndex == iLastIndex) {
+                    // _goToSlide(0);
+                    // _goToThumbnail(0);
+                    _slideToIndex(0);
+                } else {
+                    _next();
+                }
+            }, iLoopFrecuency);
+        };
         var _togglePlayback = function() {};
         var _preload = function() {};
 
@@ -133,6 +149,10 @@ App.Plugins = (function(){
             var bCSSTransitions = Modernizr.csstransitions;
             var bCSSTransforms = Modernizr.csstransforms;
             var bCSSAnimation = bCSSTransitions && bCSSTransforms; 
+            var bCanSwipeNextIndex = _iCurrentSlideIndex != iTargetIndex;
+
+            if(!bCanSwipeNextIndex)
+                return;
 
             if(bCSSAnimation) {
                 _iCurrentSlideIndex = iTargetIndex;
@@ -156,6 +176,39 @@ App.Plugins = (function(){
                 jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { 
                     _OnChangeSlide();
                 });
+            }
+        };
+        var _goToThumbnail = function(iTargetIndex) {
+            var sJQSelector = '#'+_sGalleryID;
+            var jqoTrack= $('.thumbnails .thumbnail', sJQSelector);
+            var jqoListItems = $('.thumbnails ul li', sJQSelector);
+            var itemWidth = Math.abs(jqoListItems.width()); 
+            var jqoTrack= $('.thumbnails .track', sJQSelector);
+            var iTrackWidth = Math.abs(jqoTrack.width()); 
+            var isIE = _getIEVersion();
+            var bCSSTransitions = Modernizr.csstransitions;
+            var bCSSTransforms = Modernizr.csstransforms;
+            var bCSSAnimation = bCSSTransitions && bCSSTransforms; 
+
+            if(bCSSAnimation) {
+                _iCurrentSlideIndex = iTargetIndex;
+                var iValue = (iTargetIndex * itemWidth);
+                var nPercentage = (iValue * 100) / iTrackWidth; 
+                var sPosition = iValue == 0 ? 0 : '-' + Math.round(nPercentage);
+                var nDuration = 0.6;
+
+                if(!isIE) {
+                    _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                } else {
+                    _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                }
+                _iCurrentSlideIndex = iTargetIndex;
+            } 
+            else {
+                _iCurrentSlideIndex = iTargetIndex;
+                var iValue = (_iCurrentSlideIndex * 100);
+                var sPosition = iValue == 0 ? 0 : '-' + iValue + '%';
+                jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { });
             }
         };
 
@@ -322,6 +375,7 @@ App.Plugins = (function(){
                 oItem.addEventListener('click', function(e){
                     var iTarget = this.getAttribute('data-id');
                     _goToSlide(iTarget);
+                    _goToThumbnail(iTarget);
                 });
             }
 
@@ -504,6 +558,11 @@ App.Plugins = (function(){
                             _bindSwipe(slideSettings);
 
                             //bind controls and swipe events
+
+                            //start loop playback
+                            if(_oSettings.autoplay) {
+                                _play(_oSettings.animation.holdTime);
+                            }
 
                         });
 
