@@ -214,13 +214,14 @@ App.Plugins = (function(){
         };
 
         //slide animation
-        var _setAnimationProperties = function(jqo, duration, position, usePercentage) {
-            var sCSSTransitionDuration, sCSSTransform, sCSSValue, bIsIE, jqoTrack, iDuration, sPosition, bUsePercentage;
+        var _setAnimationProperties = function(elem, duration, position, usePercentage) {
+            var sCSSTransitionDuration, sCSSTransform, sCSSValue, bIsIE, jqoTrack, oTarget, iDuration, sPosition, bUsePercentage;
             _nTranslateX = position; 
 
             iDuration = duration;
             sPosition = !usePercentage ? position.toString() + 'px' : position.toString() + '%';
-            jqoTrack = jqo;
+            jqoTrack = $(elem);
+            oTarget = elem;
             bIsIE = _getIEVersion();
             bUsePercentage = usePercentage ? usePercentage : false;
             sCSSTransitionDuration =    '-webkit-transition-duration: ' + iDuration + 's;' + 
@@ -234,6 +235,7 @@ App.Plugins = (function(){
             
             if(bIsIE == false) {
                 jqoTrack.attr('style', sCSSValue);
+                //-oTarget.setAttribute('style', sCSSValue);
             } else {
                 sCSSTransitionDuration =    '-ms-transition-duration: ' + iDuration + 's;' + 
                                                 'transition-duration: ' + iDuration + 's;';
@@ -241,6 +243,7 @@ App.Plugins = (function(){
                                         'transform: translate(' + sPosition + ',0);';
                 sCSSValue = sCSSTransitionDuration + sCSSTransform;
                 jqoTrack.attr('style', sCSSValue);
+                //-oTarget.setAttribute('style', sCSSValue);
             }
         }
         var _slideViewer = function(e, direction) {
@@ -262,7 +265,7 @@ App.Plugins = (function(){
                 var itemWidth = Math.abs(arrListItems[0].offsetWidth); 
                 var oTrack = oGallery.querySelector('.viewer .track'); 
                 var iTrackWidth = Math.abs(oTrack.offsetWidth); 
-                var jqoTrack = $(oTrack);
+                
                 var isIE = _getIEVersion();
                 var bCSSTransitions = Modernizr.csstransitions;
                 var bCSSTransforms = Modernizr.csstransforms;
@@ -276,9 +279,9 @@ App.Plugins = (function(){
                     var nDuration = 0.6;
 
                     if(!isIE) {
-                        _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                        _setAnimationProperties(oTrack, nDuration, sPosition, true);
                     } else {
-                        _setAnimationProperties(jqoTrack, nDuration, sPosition, true);
+                        _setAnimationProperties(oTrack, nDuration, sPosition, true);
                     }
                     if(direction == "next") {_OnNextSlide();}
                     if(direction == "prev") {_OnPrevSlide();}
@@ -288,6 +291,7 @@ App.Plugins = (function(){
                     _iCurrentSlideIndex = iNextIndex;
                     var iValue = (_iCurrentSlideIndex * 100);
                     var sPosition = iValue == 0 ? 0 : '-' + iValue.toString() + '%';
+                    var jqoTrack = $(oTrack);
                     jqoTrack.animate({ left: sPosition }, 600, "easeInOutCubic", function () { 
                         if(direction == "next") {_OnNextSlide();}
                         if(direction == "prev") {_OnPrevSlide();}
@@ -458,7 +462,6 @@ App.Plugins = (function(){
                                     // console.log('window.App.Cache.YTVideos.length: '+window.App.Cache.YTVideos.length); 
                                     if(_arrVideosReady.length == window.App.Cache.YTVideos.length) {
                                         _OnGalleryReady();
-                                        console.log('GalleryReady');
                                     }
                                 }
                             }
