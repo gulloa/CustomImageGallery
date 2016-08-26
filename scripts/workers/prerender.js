@@ -98,7 +98,17 @@
 
             //console.log(sGalleryThumbnails);
         }
-        sGalleryControls = '<div class="controls"><button type="button" class="prev">prev</button><button type="button" class="next">next</button></div>';
+
+        var sNextCustom = '<button type="button" class="prev">Prev</button>';
+        var sPrevCustom = '<button type="button" class="next">Next</button>';
+        if(oControls.custom) {
+            sPrevCustom = oControls.custom.prev;
+            sNextCustom = oControls.custom.prev;
+        }
+        sGalleryControls =  '<div class="controls">'+
+                                '<button type="button" class="prev">'+sPrevCustom+'</button>'+
+                                '<button type="button" class="next">'+sNextCustom+'</button>'+
+                            '</div>';
 
         sGalleryPreloader = '<div class="layer-load loading-gallery">'+
                                 '<div>'+
