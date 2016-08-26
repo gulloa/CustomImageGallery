@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<title>Image Gallery</title>
 	<link href="content/css/css.css" rel="stylesheet" type="text/css">
-    <link href="content/css/overrides.css" rel="stylesheet" type="text/css">
+    <link href="content/css/custom-gallery.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="scripts/modernizr-custom.js"></script>
 </head>
 <body>
@@ -98,7 +98,7 @@
             var demoGallery = new Plugins.CustomImageGallery();
             var oGallerySettings = {
                 id: 'demoGallery',
-                autoplay: false,
+                autoplay: true,
                 animation: {
                     holdTime: 3000, // milliseconds
                     transitionTime: 600 // milliseconds
@@ -107,8 +107,8 @@
                 controls: {
                     visible: true, // true | false
                     custom: {
-                        prev: '', // string 
-                        next: ''  // string 
+                        prev: '<span class="hidden-xs icon arrow-prev icon-arrow-double-left slick-arrow" style="display: inline;"></span>', // string 
+                        next: '<span class="hidden-xs icon arrow-next icon-arrow-double-right slick-arrow" style="display: inline;"></span>'  // string 
                     } // object | false
                 },
                 placeholderPath: 'content/img/', // string
