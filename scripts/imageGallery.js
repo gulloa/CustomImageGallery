@@ -250,18 +250,19 @@ App.Plugins = (function(){
             if(e && e.stopPropagation)
                 e.stopPropagation();
 
-            var sJQSelector = '#'+_sGalleryID;
-            var jqoGalleryItems = $('.viewer .gallery-item', sJQSelector);
-            var iGallerySize = jqoGalleryItems.length;
+            var oGallery = document.getElementById(_sGalleryID);
+            var arrGalleryItems = oGallery.querySelectorAll('.viewer .gallery-item');
+            var iGallerySize = arrGalleryItems.length;
             var iNextIndex = direction == "next" ? parseInt(_iCurrentSlideIndex) + 1 : parseInt(_iCurrentSlideIndex) - 1; 
             var bCanSwipeNextIndex = direction == "next" ? (iNextIndex < iGallerySize) : iNextIndex >= 0; 
 
             if (bCanSwipeNextIndex) {
                 _OnBeforeChangeSlide();
-                var jqoListItems = $('.viewer ul li', sJQSelector);
-                var itemWidth = Math.abs(jqoListItems.width()); 
-                var jqoTrack= $('.viewer .track', sJQSelector);
-                var iTrackWidth = Math.abs(jqoTrack.width()); 
+                var arrListItems = oGallery.querySelectorAll('.viewer li');
+                var itemWidth = Math.abs(arrListItems[0].offsetWidth); 
+                var oTrack = oGallery.querySelector('.viewer .track'); 
+                var iTrackWidth = Math.abs(oTrack.offsetWidth); 
+                var jqoTrack = $(oTrack);
                 var isIE = _getIEVersion();
                 var bCSSTransitions = Modernizr.csstransitions;
                 var bCSSTransforms = Modernizr.csstransforms;
@@ -388,6 +389,7 @@ App.Plugins = (function(){
                 threshold: 90
             };
 
+            //init jqueryswipe
             var oViewer = document.getElementById(_sGalleryID).querySelector('.viewer');
             $(oViewer).swipe(swipeOptions);
             _OnSwipeReady();
@@ -599,8 +601,8 @@ App.Plugins = (function(){
                                     }
                                 }
                             }
-                        });     
-                        oGallery.querySelectorAll('.controls button').addEventListener('click', function(e) {
+                        });    
+                        var clickControlsCallback = function(e) {
                             var sCurrentVideoID = _oSettings.data[_iCurrentSlideIndex].videoID;
                             if(sCurrentVideoID) {
                                 var iCurrentVideoIndex = _arrVideos.indexOf(sCurrentVideoID);
@@ -612,7 +614,9 @@ App.Plugins = (function(){
                                     oPlayer.stopVideo();
                                 }
                             }
-                        });/**/
+                        }; 
+                        oGallery.querySelector('.controls .next').addEventListener('click', clickControlsCallback);
+                        oGallery.querySelector('.controls .prev').addEventListener('click', clickControlsCallback);
 
                     }, false);
 
